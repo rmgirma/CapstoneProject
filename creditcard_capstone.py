@@ -31,8 +31,8 @@ def zipcode_transactions():
         month = input("Enter Month as 2 digits: ")
         year = input("Enter Year as YYYY: ")
 
-        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, cust.cust_zip, cust.CREDIT_CARD_NO,
-                ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
+        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, cust.cust_zip, 
+                cust.CREDIT_CARD_NO, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
                 FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
                 where cust.CUST_ZIP =  %s and MONTH(ccard.TIMEID) = %s AND YEAR(ccard.TIMEID) = %s
                 order by ccard.TIMEID desc"""
@@ -44,7 +44,7 @@ def zipcode_transactions():
             pretty.add_row(result)
         print(pretty)
         input(nav)
-    except Exception as err:  # Catch all other errors
+    except Exception as err:  # Catch and display errors here
         print(f"An error occurred: {err}")
 
 def sum_by_type():
@@ -176,10 +176,10 @@ def main_menu():
         else:
             print("\nInvalid choice. Please enter a number between 1 and 8.")
 
-#close the cursor and connection to the database
+#close the cursor and connection to the database once done
     cursor.close()
     conn.close()
 
-# Run the Main Menu 
+# Run the Main Menu function to start the program
 if __name__ == "__main__":
     main_menu()
