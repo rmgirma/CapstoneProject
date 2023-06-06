@@ -181,5 +181,5 @@ def main_menu():
     conn.close()
 
 # Run the Main Menu 
-if __name__ == "__main__":
-    main_menu()
+# if __name__ == "__main__":
+main_menu()
