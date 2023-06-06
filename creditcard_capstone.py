@@ -19,7 +19,7 @@ conn = mysql.connector.connect(
 # Create a cursor object to load data
 cursor = conn.cursor()
 nav = "Press Enter key to continue..." # navigation prompt
-padding = 65 # lenght of character for padding 
+padding = 65 # length of character for padding 
 
 # function to display transactions by zipcode
 def zipcode_transactions():
