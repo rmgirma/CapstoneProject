@@ -19,14 +19,15 @@ conn = mysql.connector.connect(
 # Create a cursor object to load data
 cursor = conn.cursor()
 nav = "Press Enter key to continue..." # navigation prompt
+padding = 65 # lenght of character for padding 
 
 # function to display transactions by zipcode
 def zipcode_transactions():
     try:  # Start of try block
         clear_screen()
-        print("\n" + "=" * 60)
-        print("Report By Zip Code".center(60))
-        print("=" * 60)
+        print("\n" + "=" * padding)
+        print("Report By Zip Code".center(padding))
+        print("=" * padding)
         zipcode = input("Enter Zip Code: ")
         month = input("Enter Month as 2 digits: ")
         year = input("Enter Year as YYYY: ")
@@ -50,9 +51,9 @@ def zipcode_transactions():
 def sum_by_type():
     clear_screen()
     while True:
-        print("\n" + "=" * 60)
+        print("\n" + "=" * padding)
         print("Select Transaction Type".center(60))
-        print("=" * 60)
+        print("=" * padding)
         print("     1. Education")
         print("     2. Entertainment")
         print("     3. Healthcare")
@@ -60,9 +61,9 @@ def sum_by_type():
         print("     5. Test")
         print("     6. Gas")
         print("     7. Bills")
-        print("=" * 60)
+        print("=" * padding)
         print("     8. Return to Main Menu")
-        print("=" * 60)
+        print("=" * padding)
         choice = input("Select Transaction Type: ")
         if choice == '1':
             print('Education')
@@ -103,7 +104,7 @@ def sum_by_type():
 def main_menu():
     while True:
         clear_screen()
-        print("\n" + "=" * 60)
+        print("\n" + "=" * padding)
         print("Loan Application Console Menu".center(60))
         print("=" * 60)
         print("\nPlease make your selection and press ENTER:")
@@ -116,7 +117,7 @@ def main_menu():
         print("     6. Generate monthly bill for a given card number")
         print("     7. Display customer transactions between two dates")
         print("     8. Exit")
-        print("=" * 60)
+        print("=" * padding)
         choice = input("Enter your choice (1-8): ")
         if choice == '1':
             zipcode_transactions()
@@ -124,7 +125,7 @@ def main_menu():
             sum_by_type()             
         elif choice == '3':
             clear_screen()
-            print("\n" + "=" * 60)
+            print("\n" + "=" * padding)
             print(" Branch Report for a given state".center(60))
             print("=" * 60)
             state = input("Enter State: ")
@@ -132,25 +133,25 @@ def main_menu():
             input(nav)
         elif choice == '4':
             clear_screen()
-            print("\n" + "=" * 60)
+            print("\n" + "=" * padding)
             print("View customer account details".center(60))
-            print("=" * 60)
+            print("=" * padding)
             ssn = input("Enter customer's SSN: ")
             print("\nYou entered SSN: {}".format(ssn))
             input(nav)
         elif choice == '5':
             clear_screen()
-            print("\n" + "=" * 60)
+            print("\n" + "=" * padding)
             print("Modify customer account details".center(60))
-            print("=" * 60)
+            print("=" * padding)
             ssn = input("Enter customer's SSN: ")
             print("\nYou entered SSN: {}".format(ssn))
             input(nav)
         elif choice == '6':
             clear_screen()
-            print("\n" + "=" * 60)
+            print("\n" + "=" * padding)
             print("Generate monthly bill for a given card number".center(60))
-            print("=" * 60)
+            print("=" * padding)
             cust_ccn = input("Enter credit card number: ")
             cust_mo =  input("Enter month as 2 digits: ")
             cust_yr =  input("Enter year as 4 digits: ")
@@ -160,9 +161,9 @@ def main_menu():
             input(nav)
         elif choice == '7':
             clear_screen()
-            print("\n" + "=" * 60)
+            print("\n" + "=" * padding)
             print("Display transactions between two dates".center(60))
-            print("=" * 60)
+            print("=" * padding)
             ssn = input("Enter customer's SSN: ")
             dt_start = input("Enter Start date: ")
             dt_end = input("Enter End date: ")
@@ -176,10 +177,9 @@ def main_menu():
         else:
             print("\nInvalid choice. Please enter a number between 1 and 8.")
 
-#close the cursor and connection to the database
+#close the cursor and connection to the database once done
     cursor.close()
     conn.close()
 
-# Run the Main Menu 
-if __name__ == "__main__":
-    main_menu()
+# Run the Main Menu first to start the program.
+main_menu()
