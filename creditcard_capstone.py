@@ -31,7 +31,6 @@ def zipcode_transactions():
         zipcode = input("Enter Zip Code: ")
         month = input("Enter Month as 2 digits: ")
         year = input("Enter Year as YYYY: ")
-
         query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, cust.cust_zip, 
                 cust.CREDIT_CARD_NO, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
                 FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
@@ -40,7 +39,7 @@ def zipcode_transactions():
         cursor.execute(query, (zipcode, month, year))
         results = cursor.fetchall()
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
-        pretty.field_names = ['DATE', 'FIRST_NAME', 'LAST_NAME', 'ZIP', 'CREDIT_CARD_NO', 'TRANSACTION_TYPE', 'TRANSACTION_VALUE']
+        pretty.field_names = ['Date', 'First Name', 'Last Name', 'Zip Code', 'Credit Card Number', 'Transaction Type', 'Transaction Date']
         for result in results:
             pretty.add_row(result)
         print(pretty)
