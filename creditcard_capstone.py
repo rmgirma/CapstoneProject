@@ -33,14 +33,14 @@ def zipcode_transactions():
                 where cust.CUST_ZIP =  %s and MONTH(ccard.TIMEID) = %s AND YEAR(ccard.TIMEID) = %s
                 order by ccard.TIMEID desc"""
         cursor.execute(query, (zipcode, month, year))
-        results = cursor.fetchall()
+        results = cursor.fetchall()  # to return all rows
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
         pretty.field_names = ['Date', 'First Name', 'Last Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction Type', 'Amount']
         for result in results:
             pretty.add_row(result)
         print(pretty)
         input(nav)
-    except Exception as err:  # Catch and display errors here
+    except Exception as err:  # end of try block
         print(err)
 
 def sum_by_type():  # display the number and total value for a given Type . Question 2.1.2
@@ -85,7 +85,7 @@ def sum_by_type():  # display the number and total value for a given Type . Ques
                             group by TRANSACTION_TYPE
                             having TRANSACTION_TYPE= %s """
             cursor.execute(query, (ttype,))
-            results = cursor.fetchall()
+            results = cursor.fetchall()  # to return all rows
             pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
             pretty.field_names = ['Transaction Type', 'Total Number', 'Total Amount']
             for result in results:
@@ -110,7 +110,7 @@ def branch_transactions():  # display total number and values for branches in a 
                     WHERE branch.BRANCH_STATE = %s
                     GROUP BY branch.BRANCH_NAME, branch.BRANCH_CODE"""
         cursor.execute(query, (state,)) # parameter expects a tupple so the need for , if only 1 param is passed
-        results = cursor.fetchall()
+        results = cursor.fetchall()  # to return all rows
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
         pretty.field_names = ['Branch Name', 'Branch Code', 'Transaction Count', 'Total Amount']
 
@@ -125,7 +125,53 @@ def branch_transactions():  # display total number and values for branches in a 
         
         print(pretty)
         input(nav)
-    except Exception as err:  # Catch and display errors
+    except Exception as err:  
+        print(err)
+
+def check_account_details():  # Check existing account details of a customer for Question 2.2.1
+    try:
+        clear_screen()
+        print("\n" + "=" * padding)
+        print("Check Customer Account Details".center(padding))
+        print("=" * padding)
+        ssn = input("Enter customer's SSN: ")
+        query = """SELECT * 
+                   FROM cdw_sapp_customer
+                   WHERE SSN = %s"""
+        cursor.execute(query, (ssn,))
+        result = cursor.fetchone()
+        
+        field_names = [fname[0] for fname in cursor.description] # getting the field names
+        pretty = PrettyTable()  
+        pretty.field_names = ['Field Name', 'Value']  # structure for the 2 columns table as 'Field Name' and 'Value'
+        
+        for field, value in zip(field_names, result): # here using the  Python zip() function to add rows to the PrettyTable object
+            pretty.add_row([field, value])  # adding a row for each field-value pair
+        print(pretty)
+        YN = input("\nEnter Y to modify the record or any key to ignore:  ")
+        if YN.upper() == 'Y':
+            modify_account_details(ssn)  # call this function to modify records for Question 2.2.2
+    except Exception as err:
+        print(err)
+
+def modify_account_details(ssn):  # Modify existing account details of a customer for Question 2.2.2. parameter ssn passed from above
+    try:
+        print("Please provide the new updates. Leave blank and hit Enter if you do not want to make changes ")
+        phone_number = input("Enter new phone number: ")
+        email = input("Enter new email: ")
+        if phone_number or email: 
+        # COALESCE() to return non null values of parameter if entered else will return the existing value and no change is recorded
+            update_query = """UPDATE cdw_sapp_customer
+                              SET CUST_PHONE = COALESCE(%s, CUST_PHONE),
+                                  CUST_EMAIL = COALESCE(%s, CUST_EMAIL)
+                              WHERE SSN = %s"""
+            cursor.execute(update_query, (phone_number or None, email or None, ssn,))
+            conn.commit()
+            print("Customer updated successfully.")
+        else:
+            print("No change recorded.")
+        input(nav)
+    except Exception as err: 
         print(err)
 
 
@@ -140,11 +186,10 @@ def main_menu():  # Main Menu function
         print("     1. Display transactions for a given zip code")
         print("     2. Display number and total values for a given type")
         print("     3. Display total number and values for branches in a given state ")
-        print("     4. Check existing account details of a customer")
-        print("     5. Modify existing account details of a customer")
-        print("     6. Generate monthly bill for a given card number")
-        print("     7. Display customer transactions between two dates")
-        print("     8. Exit")
+        print("     4. View or Modify existing account details of a customer")
+        print("     5. Generate monthly bill for a given card number")
+        print("     6. Display customer transactions between two dates")
+        print("     7. Exit")
         print("=" * padding)
         choice = input("Enter your choice (1-8): ")
         if choice == '1':
@@ -154,22 +199,8 @@ def main_menu():  # Main Menu function
         elif choice == '3':
             branch_transactions()
         elif choice == '4':
-            clear_screen()
-            print("\n" + "=" * padding)
-            print("View customer account details".center(60))
-            print("=" * padding)
-            ssn = input("Enter customer's SSN: ")
-            print("\nYou entered SSN: {}".format(ssn))
-            input(nav)
+            check_account_details()
         elif choice == '5':
-            clear_screen()
-            print("\n" + "=" * padding)
-            print("Modify customer account details".center(60))
-            print("=" * padding)
-            ssn = input("Enter customer's SSN: ")
-            print("\nYou entered SSN: {}".format(ssn))
-            input(nav)
-        elif choice == '6':
             clear_screen()
             print("\n" + "=" * padding)
             print("Generate monthly bill for a given card number".center(60))
@@ -181,7 +212,7 @@ def main_menu():  # Main Menu function
             print("\nYou entered the month as: {}".format(cust_mo))
             print("\nYou entered the year as : {}".format(cust_yr))
             input(nav)
-        elif choice == '7':
+        elif choice == '6':
             clear_screen()
             print("\n" + "=" * padding)
             print("Display transactions between two dates".center(60))
@@ -193,11 +224,11 @@ def main_menu():  # Main Menu function
             print("\nYou entered start date: {}".format(dt_start))
             print("\nYou entered end date: {}".format(dt_end))
             input(nav)
-        elif choice == '8':
+        elif choice == '7':
             print("Exiting...")
             break
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 8.")
+            print("\nInvalid choice. Please enter a number between 1 and 7.")
 
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
