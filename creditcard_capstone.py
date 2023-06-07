@@ -4,6 +4,7 @@ from mysql.connector import Error
 from prettytable import PrettyTable
 import pandas as pd
 import matplotlib.pyplot as plt
+from sqlalchemy import create_engine  # create sqlalchemy engine as the connection above does not work for Pandas
 
 def clear_screen():  # function to clear the screen between menu change
         _ = os.system('cls')
@@ -16,13 +17,18 @@ conn = mysql.connector.connect(   # connection to the database
     database='creditcard_capstone'
 )
 cursor = conn.cursor() # Create a cursor object to load data
+
+engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}" # sqlalchemy engine needed to work for Pandas
+                       .format(user="root", pw="password", db="creditcard_capstone"))
+
+# constant declarations:
 nav = "\nPress Enter key to continue..." # navigation prompt
-padding = 65 # length of character for padding 
+padding = 75 # length of character for padding 
 
 def zipcode_transactions(): # function to display transactions by zipcode for Question 2.1.1
     try:  # Start of try block
         clear_screen()
-        print("\n" + "=" * padding)
+        print("=" * padding)
         print("Report By Zip Code".center(padding))
         print("=" * padding)
         zipcode = input("Enter Zip Code: ")
@@ -227,24 +233,18 @@ def transactions_between_dates():  # display the transactions made by a customer
         input(nav)
     except Exception as err:
         print(err)
-        
-from sqlalchemy import create_engine  # create sqlalchemy engine as the connection above does not work for Pandas
-engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}"
-                       .format(user="root", pw="password", db="creditcard_capstone"))
  
 def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
     try:
         query = "SELECT TRANSACTION_TYPE FROM CDW_SAPP_CREDIT_CARD"
         df = pd.read_sql_query(query, engine)
         counts = df['TRANSACTION_TYPE'].value_counts()  # Count the transaction types
-
-        # Create a bar plot of the transaction types
-        counts.plot(kind='line')
+        plt.figure(figsize=(15, 6)) 
+        counts.plot(kind='line', marker='o') #line plot of the transaction types
         plt.title('Transaction Type Counts')
         plt.xlabel('Transaction Type')
         plt.ylabel('Count')
         plt.show()
-
     except Exception as err: 
         print(err)
 
@@ -262,8 +262,9 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
                 FROM cdw_sapp_customer cust
                 GROUP BY cust.CUST_STATE"""
             df = pd.read_sql_query(query, engine)
+            plt.figure(figsize=(15, 6))
             counts = df.set_index('CUST_STATE')['NUM_CUSTOMERS']
-            counts.plot(kind='bar')
+            counts.plot(kind='bar', color='green')
             plt.xlabel('State')
             plt.ylabel('Number of Customers')
             plt.title('Number of Customers per State')
@@ -274,7 +275,7 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
     except Exception as err:
         print(err)
 
-def plot_top_customers():
+def plot_top_customers(): # sum of all transactions for the top 10 customers
     try:
         if conn.is_connected():
             query = """
@@ -285,10 +286,12 @@ def plot_top_customers():
                 LIMIT 10"""
             df = pd.read_sql_query(query, engine)
             counts = df.set_index('CUST_SSN')['TOTAL_VALUE']
-            counts.plot(kind='bar')
+            plt.figure(figsize=(15, 6))
+            counts.plot(kind='bar', color=['green', 'red', 'blue', 'orange', 'purple', 'pink', 'black', 'yellow', 'brown', 'gray'])
             plt.xlabel('Customer SSN')
             plt.ylabel('Total Transaction Value')
             plt.title('Top 10 Customers by Total Transaction Value')
+            plt.ylim(bottom=5100, top=5700)  # in order to make the difference visible 
             plt.show()
         else:
             print("Connection not avaialble")
@@ -299,7 +302,7 @@ def main_menu():  # Main Menu function
     while True:
         clear_screen()
         print("\n" + "=" * padding)
-        print("Loan Application Console Menu".center(60))
+        print("Application Console Menu".center(60))
         print("=" * padding)
         print("\nPlease make your selection and press ENTER:")
         print(" ")
@@ -309,9 +312,12 @@ def main_menu():  # Main Menu function
         print("     4. View or Modify existing account details of a customer")
         print("     5. Generate monthly bill for a given card number")
         print("     6. Display customer transactions between two dates")
-        print("     7. Exit")
+        print("     7. Data Visualization - Transaction count by Type")
+        print("     8. Data Visualization - Number of Customer by State")
+        print("     9. Data Visualization - Top 10 Customeers by Transaction Amount")
+        print("     10. Exit")
         print("=" * padding)
-        choice = input("Enter your choice (1-7): ")
+        choice = input("Enter your choice (1-10): ")
         if choice == '1':
             zipcode_transactions()
         elif choice == '2':
@@ -324,17 +330,17 @@ def main_menu():  # Main Menu function
            monthly_bill()
         elif choice == '6':
             transactions_between_dates()
-        elif choice == '8':
-            plot_transaction_type()
-        elif choice == '9':
-            plot_customer_states()
-        elif choice == '10':
-            plot_top_customers()
         elif choice == '7':
+            plot_transaction_type()
+        elif choice == '8':
+            plot_customer_states()
+        elif choice == '9':
+            plot_top_customers()
+        elif choice == '10':
             print("Exiting...")
             break
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 7.")
+            print("\nInvalid choice. Please enter a number between 1 and 10.")
 
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
