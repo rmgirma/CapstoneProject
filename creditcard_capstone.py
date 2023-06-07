@@ -34,7 +34,8 @@ def zipcode_transactions(): # function to display transactions by zipcode for Qu
         zipcode = input("Enter Zip Code: ")
         month = input("Enter Month as 2 digits: ")
         year = input("Enter Year as YYYY: ")
-        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, cust.cust_phone, cust.FULL_STREET_ADDRESS,
+        query = """SELECT CONCAT(SUBSTRING(ccard.TIMEID, 5, 2), '/', SUBSTRING(ccard.TIMEID, 7, 2), '/', SUBSTRING(ccard.TIMEID, 1, 4)) AS FTIMEID,
+                cust.FIRST_NAME, cust.MIDDLE_NAME, cust.LAST_NAME, cust.cust_phone, cust.FULL_STREET_ADDRESS,
                 cust.cust_zip, cust.CREDIT_CARD_NO, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
                 FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
                 where cust.CUST_ZIP =  %s and MONTH(ccard.TIMEID) = %s AND YEAR(ccard.TIMEID) = %s
@@ -42,7 +43,7 @@ def zipcode_transactions(): # function to display transactions by zipcode for Qu
         cursor.execute(query, (zipcode, month, year))
         results = cursor.fetchall()  # to return all rows
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
-        pretty.field_names = ['Date', 'First Name', 'Last Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction Type', 'Amount']
+        pretty.field_names = ['Date', 'First Name', 'Middle Name', 'Last Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction Type', 'Amount']
         for result in results:
             pretty.add_row(result)
         print(pretty)
@@ -88,7 +89,7 @@ def sum_by_type():  # display the number and total value for a given Type . Ques
                 break
             else:
                 print("Invalid choice. Please enter a valid Transaction Type.")
-            query = """SELECT TRANSACTION_TYPE,  count(TRANSACTION_TYPE) total_num, sum(TRANSACTION_VALUE) tot_amount from CDW_SAPP_CREDIT_CARD
+            query = """SELECT TRANSACTION_TYPE,  count(TRANSACTION_TYPE) total_num, ROUND(sum(TRANSACTION_VALUE),2) tot_amount from CDW_SAPP_CREDIT_CARD
                             group by TRANSACTION_TYPE
                             having TRANSACTION_TYPE= %s """
             cursor.execute(query, (ttype,))
@@ -111,7 +112,7 @@ def branch_transactions():  # display total number and values for branches in a 
         print("=" * padding)
         state = input("Enter State: ")
         query = """SELECT branch.BRANCH_NAME, branch.BRANCH_CODE, count(ccard.TRANSACTION_VALUE) as cnt,  
-                    sum(ccard.TRANSACTION_VALUE) as amount 
+                    round(sum(ccard.TRANSACTION_VALUE),2) as amount 
                     FROM cdw_sapp_credit_card ccard 
                     JOIN cdw_sapp_branch branch ON branch.BRANCH_CODE = ccard.BRANCH_CODE
                     WHERE branch.BRANCH_STATE = %s
@@ -128,7 +129,8 @@ def branch_transactions():  # display total number and values for branches in a 
             total_count += result[2]  # 3rd element for total count of the results dataset
             total_amount += result[3] # 4th element for total amount
         pretty.add_row(['------------', '--', '----', '------------'])
-        pretty.add_row(['Grand Total', '', total_count, total_amount])
+        formated_total_amount = "{:,.2f}".format(total_amount)
+        pretty.add_row(['Grand Total', '', total_count, formated_total_amount])
         
         print(pretty)
         input(nav)
@@ -170,7 +172,8 @@ def modify_account_details(ssn):  # Modify existing account details of a custome
         # COALESCE() to return non null values of parameter if entered else will return the existing value and no change is recorded
             update_query = """UPDATE cdw_sapp_customer
                               SET CUST_PHONE = COALESCE(%s, CUST_PHONE),
-                                  CUST_EMAIL = COALESCE(%s, CUST_EMAIL)
+                                  CUST_EMAIL = COALESCE(%s, CUST_EMAIL),
+                                  LAST_UPDATED = CURRENT_TIMESTAMP
                               WHERE SSN = %s"""
             cursor.execute(update_query, (phone_number or None, email or None, ssn,))
             conn.commit()
@@ -190,7 +193,8 @@ def monthly_bill(): # generate monthly bill for a cc number for a given month an
         cust_ccn = input("\nEnter credit card number: ")
         cust_mo =  input("Enter month as 2 digits: ")
         cust_yr =  input("Enter year as 4 digits: ")
-        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
+        query = """SELECT CONCAT(SUBSTRING(ccard.TIMEID, 5, 2), '/', SUBSTRING(ccard.TIMEID, 7, 2), '/', SUBSTRING(ccard.TIMEID, 1, 4)) AS FTIMEID,
+                cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
                 FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
                 where cust.CREDIT_CARD_NO = %s and MONTH(ccard.TIMEID) = %s AND YEAR(ccard.TIMEID) = %s
                 order by ccard.TIMEID desc"""
@@ -219,7 +223,8 @@ def transactions_between_dates():  # display the transactions made by a customer
         dt_end = input("Enter End date (YYYY-MM-DD): ")
         dt_start = dt_start.replace("-", "")  # remove the - to so that format 'YYYYMMDD' matchs the TIMEID format
         dt_end = dt_end.replace("-", "")
-        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
+        query = """SELECT CONCAT(SUBSTRING(ccard.TIMEID, 5, 2), '/', SUBSTRING(ccard.TIMEID, 7, 2), '/', SUBSTRING(ccard.TIMEID, 1, 4)) AS FTIMEID, 
+                cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
                 FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
                 where cust.SSN = %s and ccard.TIMEID BETWEEN %s AND %s
                 order by ccard.TIMEID desc"""
@@ -243,12 +248,12 @@ def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
         counts.plot(kind='line', marker='o') #line plot of the transaction types
         plt.title('Transaction Type Counts')
         plt.xlabel('Transaction Type')
-        plt.ylabel('Count')
+        plt.ylabel('Transaction Count')
         plt.show()
     except Exception as err: 
         print(err)
 
-# if conn.is_connected():
+# if conn.is_connected():  # debugging
 #     print("Connection is open")
 # else:
 #     print("Connection is not open")
@@ -260,14 +265,14 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
         # if conn.is_connected():
             query = """SELECT cust.CUST_STATE, COUNT(cust.SSN) as NUM_CUSTOMERS
                 FROM cdw_sapp_customer cust
-                GROUP BY cust.CUST_STATE"""
+                GROUP BY cust.CUST_STATE ORDER BY cust.CUST_STATE"""
             df = pd.read_sql_query(query, engine)
             plt.figure(figsize=(15, 6))
             counts = df.set_index('CUST_STATE')['NUM_CUSTOMERS']
             counts.plot(kind='bar', color='green')
             plt.xlabel('State')
             plt.ylabel('Number of Customers')
-            plt.title('Number of Customers per State')
+            plt.title('Number of Customers Per State')
             plt.show()
         # else:
         #     print("Connection is not open")
@@ -277,7 +282,7 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
 
 def plot_top_customers(): # sum of all transactions for the top 10 customers
     try:
-        if conn.is_connected():
+        # if conn.is_connected():
             query = """
                 SELECT ccard.CUST_SSN, SUM(ccard.TRANSACTION_VALUE) as TOTAL_VALUE
                 FROM cdw_sapp_credit_card ccard
@@ -286,15 +291,16 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers
                 LIMIT 10"""
             df = pd.read_sql_query(query, engine)
             counts = df.set_index('CUST_SSN')['TOTAL_VALUE']
+            # counts = counts.sort_index() # sort by customer ssn
             plt.figure(figsize=(15, 6))
-            counts.plot(kind='bar', color=['green', 'red', 'blue', 'orange', 'purple', 'pink', 'black', 'yellow', 'brown', 'gray'])
-            plt.xlabel('Customer SSN')
-            plt.ylabel('Total Transaction Value')
+            counts.plot(kind='barh', color=['green', 'red', 'blue', 'orange', 'purple', 'pink', 'black', 'brown', 'gray'])
+            plt.ylabel('Customer')
+            plt.xlabel('Total Transaction Value')
             plt.title('Top 10 Customers by Total Transaction Value')
-            plt.ylim(bottom=5100, top=5700)  # in order to make the difference visible 
+            plt.xlim(left=5100, right=5700)  # in order to make the difference visible 
             plt.show()
-        else:
-            print("Connection not avaialble")
+        # else:
+            # print("Connection not avaialble")
     except Exception as err:
         print(err)
 
