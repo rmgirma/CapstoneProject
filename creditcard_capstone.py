@@ -14,7 +14,7 @@ conn = mysql.connector.connect(   # connection to the database
     database='creditcard_capstone'
 )
 cursor = conn.cursor() # Create a cursor object to load data
-nav = "Press Enter key to continue..." # navigation prompt
+nav = "\nPress Enter key to continue..." # navigation prompt
 padding = 65 # length of character for padding 
 
 # function to display transactions by zipcode for Question 2.1.1
@@ -128,7 +128,7 @@ def branch_transactions():  # display total number and values for branches in a 
     except Exception as err:  
         print(err)
 
-def check_account_details():  # Check existing account details of a customer for Question 2.2.1
+def view_account_details():  # Check existing account details of a customer for Question 2.2.1
     try:
         clear_screen()
         print("\n" + "=" * padding)
@@ -174,6 +174,58 @@ def modify_account_details(ssn):  # Modify existing account details of a custome
     except Exception as err: 
         print(err)
 
+def monthly_bill(): # generate monthly bill for a cc number for a given month and year for Question 2.2.3
+    try:
+        clear_screen()
+        print("\n" + "=" * padding)
+        print("Generate monthly bill for a given credit card number".center(padding))
+        print("=" * padding)
+        cust_ccn = input("\nEnter credit card number: ")
+        cust_mo =  input("Enter month as 2 digits: ")
+        cust_yr =  input("Enter year as 4 digits: ")
+        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
+                FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
+                where cust.CREDIT_CARD_NO = %s and MONTH(ccard.TIMEID) = %s AND YEAR(ccard.TIMEID) = %s
+                order by ccard.TIMEID desc"""
+        cursor.execute(query, (cust_ccn, cust_mo, cust_yr))
+        results = cursor.fetchall()
+        pretty = PrettyTable()
+        pretty.field_names = ['Date', 'First Name', 'Last Name', 'Transaction Type', 'Amount']
+        total_amount = 0
+        for result in results:
+            pretty.add_row(result)
+            total_amount += result[4] # total amount on 5th column
+        print(pretty)
+        print("\nTotal Monthly Bill Amount: ", total_amount)
+        input(nav)
+    except Exception as err:
+        print(err)
+        
+def transactions_between_dates():  # display the transactions made by a customer between two dates. Order by year, month, and day in descending order.
+    try: 
+        clear_screen()
+        print("\n" + "=" * padding)
+        print("Display transactions between two dates".center(padding))
+        print("=" * padding)
+        ssn = input("Enter customer's SSN: ")
+        dt_start = input("Enter Start date (YYYY-MM-DD): ")
+        dt_end = input("Enter End date (YYYY-MM-DD): ")
+        dt_start = dt_start.replace("-", "")  # remove the - to so that format 'YYYYMMDD' matchs the TIMEID format
+        dt_end = dt_end.replace("-", "")
+        query = """SELECT ccard.TIMEID, cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
+                FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
+                where cust.SSN = %s and ccard.TIMEID BETWEEN %s AND %s
+                order by ccard.TIMEID desc"""
+        cursor.execute(query, (ssn, dt_start, dt_end))
+        results = cursor.fetchall()
+        pretty = PrettyTable()
+        pretty.field_names = ['Date', 'First Name', 'Last Name', 'Transaction Type', 'Amount']
+        for result in results:
+            pretty.add_row(result)
+        print(pretty)
+        input(nav)
+    except Exception as err:
+        print(err)
 
 def main_menu():  # Main Menu function        
     while True:
@@ -191,7 +243,7 @@ def main_menu():  # Main Menu function
         print("     6. Display customer transactions between two dates")
         print("     7. Exit")
         print("=" * padding)
-        choice = input("Enter your choice (1-8): ")
+        choice = input("Enter your choice (1-7): ")
         if choice == '1':
             zipcode_transactions()
         elif choice == '2':
@@ -199,31 +251,11 @@ def main_menu():  # Main Menu function
         elif choice == '3':
             branch_transactions()
         elif choice == '4':
-            check_account_details()
+            view_account_details()
         elif choice == '5':
-            clear_screen()
-            print("\n" + "=" * padding)
-            print("Generate monthly bill for a given card number".center(60))
-            print("=" * padding)
-            cust_ccn = input("Enter credit card number: ")
-            cust_mo =  input("Enter month as 2 digits: ")
-            cust_yr =  input("Enter year as 4 digits: ")
-            print("\nYou entered credit card number: {}".format(cust_ccn))
-            print("\nYou entered the month as: {}".format(cust_mo))
-            print("\nYou entered the year as : {}".format(cust_yr))
-            input(nav)
+           monthly_bill()
         elif choice == '6':
-            clear_screen()
-            print("\n" + "=" * padding)
-            print("Display transactions between two dates".center(60))
-            print("=" * padding)
-            ssn = input("Enter customer's SSN: ")
-            dt_start = input("Enter Start date: ")
-            dt_end = input("Enter End date: ")
-            print("\nYou entered SSN: {}".format(ssn))
-            print("\nYou entered start date: {}".format(dt_start))
-            print("\nYou entered end date: {}".format(dt_end))
-            input(nav)
+            transactions_between_dates()
         elif choice == '7':
             print("Exiting...")
             break
