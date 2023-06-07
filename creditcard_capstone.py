@@ -2,6 +2,8 @@ import os
 import mysql.connector
 from mysql.connector import Error
 from prettytable import PrettyTable
+import pandas as pd
+import matplotlib.pyplot as plt
 
 def clear_screen():  # function to clear the screen between menu change
         _ = os.system('cls')
@@ -226,6 +228,76 @@ def transactions_between_dates():  # display the transactions made by a customer
         input(nav)
     except Exception as err:
         print(err)
+        
+from sqlalchemy import create_engine  # create sqlalchemy engine as the connection above does not work with Pandas
+
+engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}"
+                       .format(user="root",
+                               pw="password",
+                               db="creditcard_capstone"))
+ 
+def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
+    try:
+        query = "SELECT TRANSACTION_TYPE FROM CDW_SAPP_CREDIT_CARD"
+        df = pd.read_sql_query(query, engine)
+        counts = df['TRANSACTION_TYPE'].value_counts()  # Count the transaction types
+
+        # Create a bar plot of the transaction types
+        counts.plot(kind='line')
+        plt.title('Transaction Type Counts')
+        plt.xlabel('Transaction Type')
+        plt.ylabel('Count')
+        plt.show()
+
+    except Exception as err: 
+        print(err)
+
+# if conn.is_connected():
+#     print("Connection is open")
+# else:
+#     print("Connection is not open")
+# input(nav)
+
+def plot_customer_states(): # Find and plot which state has a high number of customers for Question 3.2
+    # input("start")
+    try:
+        # if conn.is_connected():
+            query = """SELECT cust.CUST_STATE, COUNT(cust.SSN) as NUM_CUSTOMERS
+                FROM cdw_sapp_customer cust
+                GROUP BY cust.CUST_STATE"""
+            df = pd.read_sql_query(query, engine)
+            counts = df.set_index('CUST_STATE')['NUM_CUSTOMERS']
+            counts.plot(kind='bar')
+            plt.xlabel('State')
+            plt.ylabel('Number of Customers')
+            plt.title('Number of Customers per State')
+            plt.show()
+        # else:
+        #     print("Connection is not open")
+        #     input(nav)
+    except Exception as err:
+        print(err)
+
+def plot_top_customers():
+    try:
+        if conn.is_connected():
+            query = """
+                SELECT ccard.CUST_SSN, SUM(ccard.TRANSACTION_VALUE) as TOTAL_VALUE
+                FROM cdw_sapp_credit_card ccard
+                GROUP BY ccard.CUST_SSN
+                ORDER BY TOTAL_VALUE DESC
+                LIMIT 10"""
+            df = pd.read_sql_query(query, engine)
+            counts = df.set_index('CUST_SSN')['TOTAL_VALUE']
+            counts.plot(kind='bar')
+            plt.xlabel('Customer SSN')
+            plt.ylabel('Total Transaction Value')
+            plt.title('Top 10 Customers by Total Transaction Value')
+            plt.show()
+        else:
+            print("Connection is not open")
+    except Exception as err:
+        print(err)
 
 def main_menu():  # Main Menu function        
     while True:
@@ -256,6 +328,12 @@ def main_menu():  # Main Menu function
            monthly_bill()
         elif choice == '6':
             transactions_between_dates()
+        elif choice == '8':
+            plot_transaction_type()
+        elif choice == '9':
+            plot_customer_states()
+        elif choice == '10':
+            plot_top_customers()
         elif choice == '7':
             print("Exiting...")
             break
