@@ -19,8 +19,7 @@ cursor = conn.cursor() # Create a cursor object to load data
 nav = "\nPress Enter key to continue..." # navigation prompt
 padding = 65 # length of character for padding 
 
-# function to display transactions by zipcode for Question 2.1.1
-def zipcode_transactions():
+def zipcode_transactions(): # function to display transactions by zipcode for Question 2.1.1
     try:  # Start of try block
         clear_screen()
         print("\n" + "=" * padding)
@@ -229,12 +228,9 @@ def transactions_between_dates():  # display the transactions made by a customer
     except Exception as err:
         print(err)
         
-from sqlalchemy import create_engine  # create sqlalchemy engine as the connection above does not work with Pandas
-
+from sqlalchemy import create_engine  # create sqlalchemy engine as the connection above does not work for Pandas
 engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}"
-                       .format(user="root",
-                               pw="password",
-                               db="creditcard_capstone"))
+                       .format(user="root", pw="password", db="creditcard_capstone"))
  
 def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
     try:
@@ -295,7 +291,7 @@ def plot_top_customers():
             plt.title('Top 10 Customers by Total Transaction Value')
             plt.show()
         else:
-            print("Connection is not open")
+            print("Connection not avaialble")
     except Exception as err:
         print(err)
 
