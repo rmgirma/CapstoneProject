@@ -3,25 +3,21 @@ import mysql.connector
 from mysql.connector import Error
 from prettytable import PrettyTable
 
-# function to clear the screen between menu change
-def clear_screen():  
+def clear_screen():  # function to clear the screen between menu change
         _ = os.system('cls')
         
-# connection to the database
-conn = mysql.connector.connect(
+conn = mysql.connector.connect(   # connection to the database
     host='localhost',
     port=3306,
     user='root',
     password='password',
     database='creditcard_capstone'
 )
-
-# Create a cursor object to load data
-cursor = conn.cursor()
+cursor = conn.cursor() # Create a cursor object to load data
 nav = "Press Enter key to continue..." # navigation prompt
 padding = 65 # length of character for padding 
 
-# function to display transactions by zipcode for Question 2.1
+# function to display transactions by zipcode for Question 2.1.1
 def zipcode_transactions():
     try:  # Start of try block
         clear_screen()
@@ -47,7 +43,7 @@ def zipcode_transactions():
     except Exception as err:  # Catch and display errors here
         print(err)
 
-def sum_by_type():  # display the number and total value for a given Type
+def sum_by_type():  # display the number and total value for a given Type . Question 2.1.2
     try:
         clear_screen()
         while True:
@@ -98,10 +94,42 @@ def sum_by_type():  # display the number and total value for a given Type
             input(nav)
             clear_screen()
     except Exception as err:
-        print(f"An error occurred: {err}")
+        print(err)  
+              
+def branch_transactions():  # display total number and values for branches in a given state for Question 2.1.3
+    try:
+        clear_screen()
+        print("\n" + "=" * padding)
+        print("Branch Transaction Report By State".center(padding))
+        print("=" * padding)
+        state = input("Enter State: ")
+        query = """SELECT branch.BRANCH_NAME, branch.BRANCH_CODE, count(ccard.TRANSACTION_VALUE) as cnt,  
+                    sum(ccard.TRANSACTION_VALUE) as amount 
+                    FROM cdw_sapp_credit_card ccard 
+                    JOIN cdw_sapp_branch branch ON branch.BRANCH_CODE = ccard.BRANCH_CODE
+                    WHERE branch.BRANCH_STATE = %s
+                    GROUP BY branch.BRANCH_NAME, branch.BRANCH_CODE"""
+        cursor.execute(query, (state,)) # parameter expects a tupple so the need for , if only 1 param is passed
+        results = cursor.fetchall()
+        pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
+        pretty.field_names = ['Branch Name', 'Branch Code', 'Transaction Count', 'Total Amount']
 
-# Main Menu function        
-def main_menu():
+        total_count = 0    # for grand total use
+        total_amount = 0
+        for result in results:
+            pretty.add_row(result)
+            total_count += result[2]  # 3rd element for total count of the results dataset
+            total_amount += result[3] # 4th element for total amount
+        pretty.add_row(['------------', '--', '----', '------------'])
+        pretty.add_row(['Grand Total', '', total_count, total_amount])
+        
+        print(pretty)
+        input(nav)
+    except Exception as err:  # Catch and display errors
+        print(err)
+
+
+def main_menu():  # Main Menu function        
     while True:
         clear_screen()
         print("\n" + "=" * padding)
@@ -124,13 +152,7 @@ def main_menu():
         elif choice == '2':
             sum_by_type()             
         elif choice == '3':
-            clear_screen()
-            print("\n" + "=" * padding)
-            print(" Branch Report for a given state".center(60))
-            print("=" * 60)
-            state = input("Enter State: ")
-            print("\nYou entered State: {}".format(state))
-            input(nav)
+            branch_transactions()
         elif choice == '4':
             clear_screen()
             print("\n" + "=" * padding)
@@ -177,10 +199,8 @@ def main_menu():
         else:
             print("\nInvalid choice. Please enter a number between 1 and 8.")
 
-#close the cursor and connection to the database once done
-    cursor.close()
+    cursor.close() #close the cursor and connection to the database once done
     conn.close()
 
-# Run the Main Menu 
-# if __name__ == "__main__":
+# program starts here . Run the Main Menu 
 main_menu()
