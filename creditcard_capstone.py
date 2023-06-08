@@ -4,7 +4,9 @@ from mysql.connector import Error
 from prettytable import PrettyTable
 import pandas as pd
 import matplotlib.pyplot as plt
-from sqlalchemy import create_engine  # create sqlalchemy engine as the connection above does not work for Pandas
+from sqlalchemy import create_engine  # create sqlalchemy engine as the mysql.connector did not work for Pandas
+import requests 
+import json
 
 def clear_screen():  # function to clear the screen between menu change
         _ = os.system('cls')
@@ -24,6 +26,7 @@ engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}" # sql
 # constant declarations:
 nav = "\nPress Enter key to continue..." # navigation prompt
 padding = 75 # length of character for padding 
+df_global = pd.DataFrame()  # Initialize an empty DataFrame
 
 def zipcode_transactions(): # function to display transactions by zipcode for Question 2.1.1
     try:  # Start of try block
@@ -50,6 +53,7 @@ def zipcode_transactions(): # function to display transactions by zipcode for Qu
         input(nav)
     except Exception as err:  # end of try block
         print(err)
+        input(nav)
 
 def sum_by_type():  # display the number and total value for a given Type . Question 2.1.2
     try:
@@ -102,7 +106,8 @@ def sum_by_type():  # display the number and total value for a given Type . Ques
             input(nav)
             clear_screen()
     except Exception as err:
-        print(err)  
+        print(err)
+        input(nav)  
               
 def branch_transactions():  # display total number and values for branches in a given state for Question 2.1.3
     try:
@@ -136,6 +141,7 @@ def branch_transactions():  # display total number and values for branches in a 
         input(nav)
     except Exception as err:  
         print(err)
+        input(nav)
 
 def view_account_details():  # Check existing account details of a customer for Question 2.2.1
     try:
@@ -162,6 +168,7 @@ def view_account_details():  # Check existing account details of a customer for 
             modify_account_details(ssn)  # call this function to modify records for Question 2.2.2
     except Exception as err:
         print(err)
+        input(nav)
 
 def modify_account_details(ssn):  # Modify existing account details of a customer for Question 2.2.2. parameter ssn passed from above
     try:
@@ -183,6 +190,7 @@ def modify_account_details(ssn):  # Modify existing account details of a custome
         input(nav)
     except Exception as err: 
         print(err)
+        input(nav)
 
 def monthly_bill(): # generate monthly bill for a cc number for a given month and year for Question 2.2.3
     try:
@@ -211,6 +219,7 @@ def monthly_bill(): # generate monthly bill for a cc number for a given month an
         input(nav)
     except Exception as err:
         print(err)
+        input(nav)
         
 def transactions_between_dates():  # display the transactions made by a customer between two dates. Order by year, month, and day in descending order.
     try: 
@@ -238,6 +247,7 @@ def transactions_between_dates():  # display the transactions made by a customer
         input(nav)
     except Exception as err:
         print(err)
+        input(nav)
  
 def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
     try:
@@ -252,6 +262,7 @@ def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
         plt.show()
     except Exception as err: 
         print(err)
+        input(nav)
 
 # if conn.is_connected():  # debugging
 #     print("Connection is open")
@@ -279,6 +290,7 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
         #     input(nav)
     except Exception as err:
         print(err)
+        input(nav)
 
 def plot_top_customers(): # sum of all transactions for the top 10 customers
     try:
@@ -303,7 +315,66 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers
             # print("Connection not avaialble")
     except Exception as err:
         print(err)
+        input(nav)
 
+def load_loan_data(): #  Loan Application Data API
+    try:
+        url = 'https://raw.githubusercontent.com/platformps/LoanDataset/main/loan_data.json'
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            df = pd.DataFrame(data)
+            df.to_sql('cdw_sapp_loan_application', con=engine, if_exists='append', index=False)
+            print("Loan application data loaded successfully.")
+            input(nav)
+        else:
+            print("problem with fetching data. Status code:", response.status_code)
+            input(nav)
+    except Exception as err:
+        print(err)
+        input(nav)
+        
+def plot_self_employed_approval(): # to find and plot the percentage of applications approved for self-employed applicants.
+
+    try:
+        df = pd.read_sql_table('cdw_sapp_loan_application', engine)  # Load data from database 
+        self_employed_df = df[df['Self_Employed'] == 'Yes']
+        total_applications = len(self_employed_df)
+        approved_applications = len(self_employed_df[self_employed_df['Application_Status'] == 'Y'])
+        approval_rate = approved_applications / total_applications
+        notapproval_rate = 1 - approval_rate  # Disapproval rate is the remainder
+        
+        plt.figure(figsize=(9, 6))
+        plt.pie([approval_rate, notapproval_rate], labels=['Approved', 'Not Approved'], 
+                autopct='%1.1f%%', colors=['green', 'red'], startangle=140)
+        plt.title('Percentage of Applications Approved for Self-Employed Applicants')
+        plt.show()
+    except Exception as err:
+        print(err)
+        input(nav)
+
+def plot_rejection_of_married_male(): # to find the percentage of rejection for married male applicants.
+    try:
+        df = pd.read_sql_table('cdw_sapp_loan_application', engine)  # Load data from database 
+        married_male_df = df[(df['Gender'] == 'Male') & (df['Married'] == 'Yes')]
+        total_married_male = len(married_male_df)
+        rejected_applications = len(married_male_df[married_male_df['Application_Status'] == 'N'])
+        
+        rejection_rate = rejected_applications / total_married_male
+        acceptance_rate = 1 - rejection_rate  
+        plt.figure(figsize=(9, 6))
+        plt.pie([rejection_rate, acceptance_rate], labels=['Rejected', 'Accepted'], 
+            autopct='%.2f%%', colors=['red', 'green'])
+        plt.title('Percentage of Applications Rejected for Married Male Applicants')
+        print("\nTotal Married Male: ", total_married_male)
+        print("Total Rejections  : ", rejected_applications)
+        print("Rejection Rate    : ", rejection_rate*100)
+        input(nav)
+        plt.show()
+    except Exception as err:
+        print(err)
+        input(nav)
+        
 def main_menu():  # Main Menu function        
     while True:
         clear_screen()
@@ -342,12 +413,18 @@ def main_menu():  # Main Menu function
             plot_customer_states()
         elif choice == '9':
             plot_top_customers()
+        elif choice == '11':
+            load_loan_data()
+        elif choice == '12':
+            plot_self_employed_approval()
+        elif choice == '13':
+            plot_rejection_of_married_male()
         elif choice == '10':
             print("Exiting...")
             break
         else:
             print("\nInvalid choice. Please enter a number between 1 and 10.")
-
+            
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
 
