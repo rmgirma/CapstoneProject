@@ -46,7 +46,7 @@ def zipcode_transactions(): # function to display transactions by zipcode for Qu
         cursor.execute(query, (zipcode, month, year))
         results = cursor.fetchall()  # to return all rows
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
-        pretty.field_names = ['Date', 'First Name', 'Middle Name', 'Last Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction Type', 'Amount']
+        pretty.field_names = ['Date', 'First  Name', 'Middle Name', 'Last  Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction-Type', 'Amount']
         for result in results:
             pretty.add_row(result)
         print(pretty)
@@ -424,6 +424,10 @@ def main_menu():  # Main Menu function
             plot_self_employed_approval()
         elif choice == '12':
             plot_rejection_of_married_male()
+        elif choice == '13':
+            clear_screen()
+        elif choice == '14':
+            clear_screen()
         elif choice == '15':
             print("Exiting...")
             break
