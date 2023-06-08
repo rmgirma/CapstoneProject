@@ -24,7 +24,7 @@ engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}" # sql
                        .format(user="root", pw="password", db="creditcard_capstone"))
 
 # constant declarations:
-nav = "\nPress Enter key to continue..." # navigation prompt
+nav = "\nPress Enter key to continue..." # used to pause the navigation prompt
 padding = 75 # length of character for padding 
 df_global = pd.DataFrame()  # Initialize an empty DataFrame
 
@@ -166,11 +166,11 @@ def view_account_details():  # Check existing account details of a customer for 
         YN = input("\nEnter Y to modify the record or any key to ignore:  ")
         if YN.upper() == 'Y':
             modify_account_details(ssn)  # call this function to modify records for Question 2.2.2
-    except Exception as err:
-        print(err)
+    except Exception:
+        print("SSN not found. Please Try again")
         input(nav)
 
-def modify_account_details(ssn):  # Modify existing account details of a customer for Question 2.2.2. parameter ssn passed from above
+def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter ssn passed from view_account_details()
     try:
         print("Please provide the new updates. Leave blank and hit Enter if you do not want to make changes ")
         phone_number = input("Enter new phone number: ")
@@ -324,11 +324,11 @@ def load_loan_data(): #  Loan Application Data API
         if response.status_code == 200:
             data = json.loads(response.text)
             df = pd.DataFrame(data)
-            df.to_sql('cdw_sapp_loan_application', con=engine, if_exists='append', index=False)
+            df.to_sql('cdw_sapp_loan_application', con=engine, if_exists='append', index=False)  # appends record into the loan table. Drop table manually
             print("Loan application data loaded successfully.")
             input(nav)
         else:
-            print("problem with fetching data. Status code:", response.status_code)
+            print("problem:", response.status_code)
             input(nav)
     except Exception as err:
         print(err)
@@ -368,7 +368,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         plt.title('Percentage of Applications Rejected for Married Male Applicants')
         print("\nTotal Married Male: ", total_married_male)
         print("Total Rejections  : ", rejected_applications)
-        print("Rejection Rate    : ", rejection_rate*100)
+        print("Rejection Rate %  : ", rejection_rate*100)
         input(nav)
         plt.show()
     except Exception as err:
@@ -379,7 +379,7 @@ def main_menu():  # Main Menu function
     while True:
         clear_screen()
         print("\n" + "=" * padding)
-        print("Application Console Menu".center(60))
+        print("Application Console Menu".center(padding))
         print("=" * padding)
         print("\nPlease make your selection and press ENTER:")
         print(" ")
@@ -391,10 +391,15 @@ def main_menu():  # Main Menu function
         print("     6. Display customer transactions between two dates")
         print("     7. Data Visualization - Transaction count by Type")
         print("     8. Data Visualization - Number of Customer by State")
-        print("     9. Data Visualization - Top 10 Customeers by Transaction Amount")
-        print("     10. Exit")
+        print("     9. Data Visualization - Top Ten Customeers by Transaction Amount")
+        print("     10. load_loan_data")
+        print("     11. plot_self_employed_approval")
+        print("     12. plot_rejection_of_married_male")
+        print("     13. ")
+        print("     14. ")
+        print("     15. Exit")
         print("=" * padding)
-        choice = input("Enter your choice (1-10): ")
+        choice = input("Enter your choice (1-15): ")
         if choice == '1':
             zipcode_transactions()
         elif choice == '2':
@@ -413,17 +418,17 @@ def main_menu():  # Main Menu function
             plot_customer_states()
         elif choice == '9':
             plot_top_customers()
-        elif choice == '11':
-            load_loan_data()
-        elif choice == '12':
-            plot_self_employed_approval()
-        elif choice == '13':
-            plot_rejection_of_married_male()
         elif choice == '10':
+            load_loan_data()
+        elif choice == '11':
+            plot_self_employed_approval()
+        elif choice == '12':
+            plot_rejection_of_married_male()
+        elif choice == '15':
             print("Exiting...")
             break
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 10.")
+            print("\nInvalid choice. Please enter a number between 1 and 15.")   # end of menu function
             
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
