@@ -376,8 +376,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
     except Exception as err:
         print(err)
         input(nav)
-
-        
+      
 def main_menu():  # Main Menu function        
     while True:
         clear_screen()
@@ -395,11 +394,11 @@ def main_menu():  # Main Menu function
         print("     7. Data Visualization - Transaction count by Type")
         print("     8. Data Visualization - Number of Customer by State")
         print("     9. Data Visualization - Top Ten Customeers by Transaction Amount")
-        print("     10. load_loan_data")
+        print("     10. Load Loan Application Dataset")
         print("     11. plot_self_employed_approval")
         print("     12. plot_rejection_of_married_male")
         print("     13. plot_top3_transaction_month")
-        print("     14. ")
+        print("     14. plot_healthcare_branches")
         print("     15. Exit")
         print("=" * padding)
         choice = input("Enter your choice (1-15): ")
@@ -430,7 +429,7 @@ def main_menu():  # Main Menu function
         elif choice == '13':
             clear_screen()
         elif choice == '14':
-            plot_healthcare_branches()
+            clear_screen()
         elif choice == '15':
             print("Exiting...")
             break
