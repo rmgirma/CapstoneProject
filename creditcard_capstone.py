@@ -28,7 +28,7 @@ nav = "\nPress Enter key to continue..." # used to pause the navigation prompt
 padding = 75 # length of character for padding 
 df_global = pd.DataFrame()  # Initialize an empty DataFrame
 
-def zipcode_transactions(): # function to display transactions by zipcode for Question 2.1.1
+def zipcode_transactions(): # function to display transactions by zipcode (2.1.1)
     try:  # Start of try block
         clear_screen()
         print("=" * padding)
@@ -55,7 +55,7 @@ def zipcode_transactions(): # function to display transactions by zipcode for Qu
         print(err)
         input(nav)
 
-def sum_by_type():  # display the number and total value for a given Type . Question 2.1.2
+def sum_by_type():  # display the number and total value for a given Type . (2.1.2)
     try:
         clear_screen()
         while True:
@@ -109,7 +109,7 @@ def sum_by_type():  # display the number and total value for a given Type . Ques
         print(err)
         input(nav)  
               
-def branch_transactions():  # display total number and values for branches in a given state for Question 2.1.3
+def branch_transactions():  # display total number and values for branches in a given state (2.1.3)
     try:
         clear_screen()
         print("\n" + "=" * padding)
@@ -143,7 +143,7 @@ def branch_transactions():  # display total number and values for branches in a 
         print(err)
         input(nav)
 
-def view_account_details():  # Check existing account details of a customer for Question 2.2.1
+def view_account_details():  # Check existing account details of a customer (2.2.1)
     try:
         clear_screen()
         print("\n" + "=" * padding)
@@ -165,7 +165,7 @@ def view_account_details():  # Check existing account details of a customer for 
         print(pretty)
         YN = input("\nEnter Y to modify the record or any key to ignore:  ")
         if YN.upper() == 'Y':
-            modify_account_details(ssn)  # call this function to modify records for Question 2.2.2
+            modify_account_details(ssn)  # call this function to modify records (2.2.2)
     except Exception:
         print("SSN not found. Please Try again")
         input(nav)
@@ -192,7 +192,7 @@ def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter
         print(err)
         input(nav)
 
-def monthly_bill(): # generate monthly bill for a cc number for a given month and year for Question 2.2.3
+def monthly_bill(): # generate monthly bill for a cc number for a given month and year (2.2.3)
     try:
         clear_screen()
         print("\n" + "=" * padding)
@@ -221,7 +221,7 @@ def monthly_bill(): # generate monthly bill for a cc number for a given month an
         print(err)
         input(nav)
         
-def transactions_between_dates():  # display the transactions made by a customer between two dates. Order by year, month, and day in descending order.
+def transactions_between_dates():  # display the transactions made by a customer between two dates. (2.2.4)
     try: 
         clear_screen()
         print("\n" + "=" * padding)
@@ -249,7 +249,7 @@ def transactions_between_dates():  # display the transactions made by a customer
         print(err)
         input(nav)
  
-def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
+def plot_transaction_type(): # Data Analysis and Visualization (3.3.1)
     try:
         query = "SELECT TRANSACTION_TYPE FROM CDW_SAPP_CREDIT_CARD"
         df = pd.read_sql_query(query, engine)
@@ -270,7 +270,7 @@ def plot_transaction_type(): # Data Analysis and Visualization Question 3.1
 #     print("Connection is not open")
 # input(nav)
 
-def plot_customer_states(): # Find and plot which state has a high number of customers for Question 3.2
+def plot_customer_states(): # Find and plot which state has a high number of customers (3.3.2)
     # input("start")
     try:
         # if conn.is_connected():
@@ -292,7 +292,7 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
         print(err)
         input(nav)
 
-def plot_top_customers(): # sum of all transactions for the top 10 customers
+def plot_top_customers(): # sum of all transactions for the top 10 customers (3.3.3)
     try:
         # if conn.is_connected():
             query = """
@@ -317,10 +317,12 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers
         print(err)
         input(nav)
 
-def load_loan_data(): #  Loan Application Data API
+def load_loan_data(): #  Loan Application Data API (4.4.1) (4.4.2) & (4.4.3)
     try:
         url = 'https://raw.githubusercontent.com/platformps/LoanDataset/main/loan_data.json'
         response = requests.get(url)
+        print("Status Code: ", response.status_code)
+        input(nav)                          #  4.2
         if response.status_code == 200:
             data = json.loads(response.text)
             df = pd.DataFrame(data)
@@ -334,7 +336,7 @@ def load_loan_data(): #  Loan Application Data API
         print(err)
         input(nav)
         
-def plot_self_employed_approval(): # to find and plot the percentage of applications approved for self-employed applicants.
+def plot_self_employed_approval(): # to find and plot the percentage of applications approved for self-employed applicants. (5.5.1)
 
     try:
         df = pd.read_sql_table('cdw_sapp_loan_application', engine)  # Load data from database 
@@ -344,7 +346,7 @@ def plot_self_employed_approval(): # to find and plot the percentage of applicat
         approval_rate = approved_applications / total_applications
         notapproval_rate = 1 - approval_rate  # Disapproval rate is the remainder
         
-        plt.figure(figsize=(9, 6))
+        plt.figure(figsize=(10, 6))
         plt.pie([approval_rate, notapproval_rate], labels=['Approved', 'Not Approved'], 
                 autopct='%1.1f%%', colors=['green', 'red'], startangle=140)
         plt.title('Percentage of Applications Approved for Self-Employed Applicants')
@@ -353,7 +355,7 @@ def plot_self_employed_approval(): # to find and plot the percentage of applicat
         print(err)
         input(nav)
 
-def plot_rejection_of_married_male(): # to find the percentage of rejection for married male applicants.
+def plot_rejection_of_married_male(): # to find the percentage of rejection for married male applicants. (5.5.2)
     try:
         df = pd.read_sql_table('cdw_sapp_loan_application', engine)  # Load data from database 
         married_male_df = df[(df['Gender'] == 'Male') & (df['Married'] == 'Yes')]
@@ -362,7 +364,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         
         rejection_rate = rejected_applications / total_married_male
         acceptance_rate = 1 - rejection_rate  
-        plt.figure(figsize=(9, 6))
+        plt.figure(figsize=(10, 6))
         plt.pie([rejection_rate, acceptance_rate], labels=['Rejected', 'Accepted'], 
             autopct='%.2f%%', colors=['red', 'green'])
         plt.title('Percentage of Applications Rejected for Married Male Applicants')
@@ -374,6 +376,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
     except Exception as err:
         print(err)
         input(nav)
+
         
 def main_menu():  # Main Menu function        
     while True:
@@ -395,7 +398,7 @@ def main_menu():  # Main Menu function
         print("     10. load_loan_data")
         print("     11. plot_self_employed_approval")
         print("     12. plot_rejection_of_married_male")
-        print("     13. ")
+        print("     13. plot_top3_transaction_month")
         print("     14. ")
         print("     15. Exit")
         print("=" * padding)
@@ -427,7 +430,7 @@ def main_menu():  # Main Menu function
         elif choice == '13':
             clear_screen()
         elif choice == '14':
-            clear_screen()
+            plot_healthcare_branches()
         elif choice == '15':
             print("Exiting...")
             break
