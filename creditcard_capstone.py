@@ -24,9 +24,9 @@ engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}" # sql
                        .format(user="root", pw="password", db="creditcard_capstone"))
 
 # constant declarations:
-nav = "\nPress Enter key to continue..." # used to pause the navigation prompt
+nav = "\nPress Enter key to continue..." # used to pause the flow
 padding = 75 # length of character for padding 
-df_global = pd.DataFrame()  # Initialize an empty DataFrame
+# df_global = pd.DataFrame()  # Initialize an empty DataFrame
 
 def zipcode_transactions(): # function to display transactions by zipcode (2.1.1)
     try:  # Start of try block
@@ -46,7 +46,7 @@ def zipcode_transactions(): # function to display transactions by zipcode (2.1.1
         cursor.execute(query, (zipcode, month, year))
         results = cursor.fetchall()  # to return all rows
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
-        pretty.field_names = ['Date', 'First  Name', 'Middle Name', 'Last  Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction-Type', 'Amount']
+        pretty.field_names = ['Date', 'First Name', 'Middle', 'Last Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction-Type', 'Amount']
         for result in results:
             pretty.add_row(result)
         print(pretty)
@@ -186,7 +186,7 @@ def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter
             conn.commit()
             print("Customer updated successfully.")
         else:
-            print("No change recorded.")
+            print("No update needed")
         input(nav)
     except Exception as err: 
         print(err)
@@ -303,9 +303,8 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
                 LIMIT 10"""
             df = pd.read_sql_query(query, engine)
             counts = df.set_index('CUST_SSN')['TOTAL_VALUE']
-            # counts = counts.sort_index() # sort by customer ssn
             plt.figure(figsize=(15, 6))
-            counts.plot(kind='barh', color=['green', 'red', 'blue', 'orange', 'purple', 'pink', 'black', 'brown', 'gray'])
+            counts.plot(kind='barh')
             plt.ylabel('Customer')
             plt.xlabel('Total Transaction Value')
             plt.title('Top 10 Customers by Total Transaction Value')
@@ -348,7 +347,7 @@ def plot_self_employed_approval(): # to find and plot the percentage of applicat
         
         plt.figure(figsize=(10, 6))
         plt.pie([approval_rate, notapproval_rate], labels=['Approved', 'Not Approved'], 
-                autopct='%1.1f%%', colors=['green', 'red'], startangle=140)
+                autopct='%1.1f%%', colors=['green', 'grey'], startangle=90)
         plt.title('Percentage of Applications Approved for Self-Employed Applicants')
         plt.show()
     except Exception as err:
@@ -366,7 +365,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         acceptance_rate = 1 - rejection_rate  
         plt.figure(figsize=(10, 6))
         plt.pie([rejection_rate, acceptance_rate], labels=['Rejected', 'Accepted'], 
-            autopct='%.2f%%', colors=['red', 'green'])
+            autopct='%.2f%%', colors=['red', 'green'], startangle=90)
         plt.title('Percentage of Applications Rejected for Married Male Applicants')
         print("\nTotal Married Male: ", total_married_male)
         print("Total Rejections  : ", rejected_applications)
@@ -395,10 +394,10 @@ def main_menu():  # Main Menu function
         print("     8. Data Visualization - Number of Customer by State")
         print("     9. Data Visualization - Top Ten Customeers by Transaction Amount")
         print("     10. Load Loan Application Dataset")
-        print("     11. plot_self_employed_approval")
-        print("     12. plot_rejection_of_married_male")
-        print("     13. plot_top3_transaction_month")
-        print("     14. plot_healthcare_branches")
+        print("     11. Data Visualization - Approved Self-Employed Applicants")
+        print("     12. Data Visualization - Rejected Married Male Applicants")
+        print("     13. Data Visualization - Top Three Months Largest Transactions")
+        print("     14. Data Visualization - Highest Healthcare Transaction Branch")
         print("     15. Exit")
         print("=" * padding)
         choice = input("Enter your choice (1-15): ")
