@@ -173,20 +173,45 @@ def view_account_details():  # Check existing account details of a customer (2.2
 def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter ssn passed from view_account_details()
     try:
         print("Please provide the new updates. Leave blank and hit Enter if you do not want to make changes ")
+        first_name = input("Enter new First Name: ")
+        middle_name = input("Enter new Middle Name: ")
+        last_name = input("Enter new Last Name: ")
+        cc_number = input("Enter new Credit Card Number: ")
+        full_street_add = input("Enter new Full Street Address: ")
+        city = input("Enter new City: ")
+        state = input("Enter new State: ")
+        country = input("Enter new Country: ")
+        while True:
+            zipcode = input("Enter new Zip Code: ")
+            if zipcode.isdigit() or zipcode == '':
+                break
+            else:
+                print("Invalid entry. Please enter numbers only.")
         phone_number = input("Enter new phone number: ")
         email = input("Enter new email: ")
-        if phone_number or email: 
+        if first_name or middle_name or last_name or cc_number or full_street_add or city or state or country or zipcode or phone_number or email: 
         # COALESCE() to return non null values of parameter if entered else will return the existing value and no change is recorded
             update_query = """UPDATE cdw_sapp_customer
-                              SET CUST_PHONE = COALESCE(%s, CUST_PHONE),
-                                  CUST_EMAIL = COALESCE(%s, CUST_EMAIL),
-                                  LAST_UPDATED = CURRENT_TIMESTAMP
+                            SET 
+                            FIRST_NAME = COALESCE(%s, FIRST_NAME),
+                            MIDDLE_NAME = COALESCE(%s, MIDDLE_NAME),
+                            LAST_NAME = COALESCE(%s, LAST_NAME),
+                            CREDIT_CARD_NO = COALESCE(%s, CREDIT_CARD_NO),
+                            FULL_STREET_ADDRESS = COALESCE(%s, FULL_STREET_ADDRESS),
+                            CUST_CITY = COALESCE(%s, CUST_CITY),
+                            CUST_STATE = COALESCE(%s, CUST_STATE),
+                            CUST_COUNTRY = COALESCE(%s, CUST_COUNTRY),
+                            CUST_ZIP = COALESCE(%s, CUST_ZIP),
+                            CUST_PHONE = COALESCE(%s, CUST_PHONE),
+                            CUST_EMAIL = COALESCE(%s, CUST_EMAIL),
+                            LAST_UPDATED = CURRENT_TIMESTAMP
                               WHERE SSN = %s"""
-            cursor.execute(update_query, (phone_number or None, email or None, ssn,))
+            cursor.execute(update_query, (first_name or None, middle_name or None, last_name or None, cc_number or None, full_street_add or None,
+                            city or None, state or None, country or None, zipcode or None, phone_number or None, email or None, ssn,))
             conn.commit()
-            print("Customer updated successfully.")
+            print("\nCustomer updated successfully.")
         else:
-            print("No update needed")
+            print("\nNo update made")
         input(nav)
     except Exception as err: 
         print(err)
