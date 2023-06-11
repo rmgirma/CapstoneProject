@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from sqlalchemy import create_engine  # create sqlalchemy engine as the mysql.connector did not work for Pandas
 import requests 
 import json
+import webbrowser # for Tableau charts
+
 
 def clear_screen():  # function to clear the screen between menu change
         _ = os.system('cls')
@@ -400,6 +402,13 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
     except Exception as err:
         print(err)
         input(nav)
+ 
+def show_tableau():
+    base_url = "https://public.tableau.com/views/"
+    workbook = "CO2PerCapita_16845056458660"
+    view = "Sheet1"
+    url = base_url + workbook + "/" + view
+    webbrowser.open_new_tab(url)     
       
 def main_menu():  # Main Menu function        
     while True:
@@ -453,7 +462,7 @@ def main_menu():  # Main Menu function
         elif choice == '13':
             clear_screen()
         elif choice == '14':
-            clear_screen()
+            show_tableau()
         elif choice == '15':
             print("Exiting...")
             break
