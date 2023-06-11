@@ -492,7 +492,7 @@ def main_menu():  # Main Menu function
         elif choice == '13':
             clear_screen()
         elif choice == '14':
-            show_tableau()
+            clear_screen()
         elif choice == '15':
             show_tableau()
         elif choice == '16':
