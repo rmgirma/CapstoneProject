@@ -406,8 +406,8 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
 def show_tableau():
     base_url = "https://public.tableau.com/views/"
     workbook = "CO2PerCapita_16845056458660"
-    view = "Sheet1"
-    url = base_url + workbook + "/" + view
+    sheet = "Sheet1"
+    url = base_url + workbook + "/" + sheet
     webbrowser.open_new_tab(url)     
       
 def main_menu():  # Main Menu function        
