@@ -62,7 +62,7 @@ def sum_by_type():  # display the number and total value for a given Type . (2.1
         clear_screen()
         while True:
             print("\n" + "=" * padding)
-            print("Select Transaction Type".center(60))
+            print("Select Transaction Type".center(padding))
             print("=" * padding)
             print("     1. Education")
             print("     2. Entertainment")
@@ -165,8 +165,8 @@ def view_account_details():  # Check existing account details of a customer (2.2
         for field, value in zip(field_names, result): # here using the  Python zip() function to add rows to the PrettyTable object
             pretty.add_row([field, value])  # adding a row for each field-value pair
         print(pretty)
-        YN = input("\nEnter Y to modify the record or any key to ignore:  ")
-        if YN.upper() == 'Y':
+        modify = input("\nEnter Y to modify the record or any key to ignore:  ")
+        if modify.upper() == 'Y':
             modify_account_details(ssn)  # call this function to modify records (2.2.2)
     except Exception:
         print("SSN not found. Please Try again")
@@ -183,7 +183,7 @@ def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter
         city = input("Enter new City: ")
         state = input("Enter new State: ")
         country = input("Enter new Country: ")
-        while True:
+        while True:                                             # to enforce digit only input for zip code
             zipcode = input("Enter new Zip Code: ")
             if zipcode.isdigit() or zipcode == '':
                 break
@@ -404,11 +404,40 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         input(nav)
  
 def show_tableau():
-    base_url = "https://public.tableau.com/views/"
-    workbook = "CO2PerCapita_16845056458660"
-    sheet = "Sheet1"
-    url = base_url + workbook + "/" + sheet
-    webbrowser.open_new_tab(url)     
+    try:
+        clear_screen()
+        while True:
+            print("\n" + "=" * padding)
+            print("Select Tableau Visualization".center(padding))
+            print("=" * padding)
+            print("     1. Number and Amount of Customer's Transactions by State")
+            print("     2. Total Transaction Amount by Type")
+            print("     3. Heatmap Number of Customer by State")
+            print("=" * padding)
+            print("     4. Return to Main Menu")
+            print("=" * padding)
+            choice = input("Select your choice: ")
+            sheet =''
+            if choice == "1":
+                sheet ="TransByState"
+            elif choice == "2":
+                sheet = "TransactionByType"
+            elif choice == "3":
+                sheet = "CustomerByState"
+            elif choice == "4":
+                print("Returning to Main MENU...")     
+                break
+            else:
+                print("Invalid choice. Please choose between 1 and 4.")
+                
+            base_url = "https://public.tableau.com/views/"
+            workbook = "ExampleBankTransactionsbyState"
+            url = base_url + workbook + "/" + sheet
+            webbrowser.open_new_tab(url)
+            clear_screen()
+    except Exception as err:
+        print(err)
+        input(nav)
       
 def main_menu():  # Main Menu function        
     while True:
@@ -432,9 +461,10 @@ def main_menu():  # Main Menu function
         print("     12. Data Visualization - Rejected Married Male Applicants")
         print("     13. Data Visualization - Top Three Months Largest Transactions")
         print("     14. Data Visualization - Highest Healthcare Transaction Branch")
-        print("     15. Exit")
+        print("     15. Tableau Data Visualizations")
+        print("     16. Exit")
         print("=" * padding)
-        choice = input("Enter your choice (1-15): ")
+        choice = input("Enter your choice (1-16): ")
         if choice == '1':
             zipcode_transactions()
         elif choice == '2':
@@ -464,10 +494,12 @@ def main_menu():  # Main Menu function
         elif choice == '14':
             show_tableau()
         elif choice == '15':
+            show_tableau()
+        elif choice == '16':
             print("Exiting...")
             break
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 15.")   # end of menu function
+            print("\nInvalid choice. Please enter a number between 1 and 16.")   # end of menu function
             
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
