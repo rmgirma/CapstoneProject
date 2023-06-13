@@ -138,8 +138,8 @@ def branch_transactions():  # display total number and values for branches in a 
         pretty.add_row(['------------', '--', '----', '------------'])
         formated_total_amount = "{:,.2f}".format(total_amount)
         pretty.add_row(['Grand Total', '', total_count, formated_total_amount])
-        
         print(pretty)
+        
         input(nav)
     except Exception as err:  
         print(err)
@@ -192,7 +192,7 @@ def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter
         phone_number = input("Enter new phone number: ")
         email = input("Enter new email: ")
         if first_name or middle_name or last_name or cc_number or full_street_add or city or state or country or zipcode or phone_number or email: 
-        # COALESCE() to return non null values of parameter if entered else will return the existing value and no change is recorded
+        # COALESCE() to return non null values of parameter if entered, else will return the existing value and no change is recorded
             update_query = """UPDATE cdw_sapp_customer
                             SET 
                             FIRST_NAME = COALESCE(%s, FIRST_NAME),
@@ -413,8 +413,9 @@ def show_tableau():
             print("     1. Number and Amount of Customer's Transactions by State")
             print("     2. Total Transaction Amount by Type")
             print("     3. Heatmap Number of Customer by State")
+            print("     4. Dashboard - Example")
             print("=" * padding)
-            print("     4. Return to Main Menu")
+            print("     5. Return to Main Menu")
             print("=" * padding)
             choice = input("Select your choice: ")
             sheet =''
@@ -425,11 +426,12 @@ def show_tableau():
             elif choice == "3":
                 sheet = "CustomerByState"
             elif choice == "4":
+                sheet = "ExamleBankDashboard"
+            elif choice == "5":
                 print("Returning to Main MENU...")     
                 break
             else:
-                print("Invalid choice. Please choose between 1 and 4.")
-                
+                print("Invalid choice. Please choose between 1 and 5.")   
             base_url = "https://public.tableau.com/views/"
             workbook = "ExampleBankTransactionsbyState"
             url = base_url + workbook + "/" + sheet
@@ -503,6 +505,5 @@ def main_menu():  # Main Menu function
             
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
-
 # program starts here . Run the Main Menu 
 main_menu()
