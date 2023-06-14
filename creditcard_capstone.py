@@ -431,11 +431,17 @@ def show_tableau():
                 print("Returning to Main MENU...")     
                 break
             else:
-                print("Invalid choice. Please choose between 1 and 5.")   
+                print("Invalid choice. Please choose between 1 and 5.") 
+                input(nav)  
             base_url = "https://public.tableau.com/views/"
             workbook = "ExampleBankTransactionsbyState"
             url = base_url + workbook + "/" + sheet
-            webbrowser.open_new_tab(url)
+            
+            response = requests.get(url)
+            # print("Status Code: ", response.status_code)
+            # input(nav)                          
+            if response.status_code == 200:
+                webbrowser.open_new_tab(url)
             clear_screen()
     except Exception as err:
         print(err)
@@ -451,6 +457,7 @@ def main_menu():  # Main Menu function
         print(" ")
         print("     1. Display transactions for a given zip code")
         print("     2. Display number and total values for a given type")
+        print("        ---- Sub Menu")
         print("     3. Display total number and values for branches in a given state ")
         print("     4. View or Modify existing account details of a customer")
         print("     5. Generate monthly bill for a given card number")
@@ -464,6 +471,7 @@ def main_menu():  # Main Menu function
         print("     13. Data Visualization - Top Three Months Largest Transactions")
         print("     14. Data Visualization - Highest Healthcare Transaction Branch")
         print("     15. Tableau Data Visualizations")
+        print("         ---- Sub Menu")
         print("     16. Exit")
         print("=" * padding)
         choice = input("Enter your choice (1-16): ")
