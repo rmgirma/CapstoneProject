@@ -323,19 +323,22 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
     try:
         # if conn.is_connected():
             query = """
-                SELECT ccard.CUST_SSN, SUM(ccard.TRANSACTION_VALUE) as TOTAL_VALUE
-                FROM cdw_sapp_credit_card ccard
-                GROUP BY ccard.CUST_SSN
+                SELECT concat(cust.FIRST_NAME,' ', cust.middle_name,' ', cust.last_name) as full_name, SUM(ccard.TRANSACTION_VALUE) as TOTAL_VALUE
+                FROM cdw_sapp_credit_card ccard join cdw_sapp_customer cust on cust.SSN = ccard.CUST_SSN
+                GROUP BY concat(cust.FIRST_NAME,' ', cust.middle_name,' ', cust.last_name), ccard.CUST_SSN
                 ORDER BY TOTAL_VALUE DESC
                 LIMIT 10"""
             df = pd.read_sql_query(query, engine)
-            counts = df.set_index('CUST_SSN')['TOTAL_VALUE']
+            counts = df.set_index('full_name')['TOTAL_VALUE']
             plt.figure(figsize=(15, 6))
             counts.plot(kind='barh')
             plt.ylabel('Customer')
             plt.xlabel('Total Transaction Value')
             plt.title('Top 10 Customers by Total Transaction Value')
             plt.xlim(left=5100, right=5700)  # in order to make the difference visible 
+            x = ['TOTAL_VALUE']
+            df.apply(lambda row: plt.text(row['TOTAL_VALUE'], row.name, round(row['TOTAL_VALUE'], 2)), axis=1) # to show value on each bar
+            #                                  x axis          y axis     text to display
             plt.show()
         # else:
             # print("Connection not avaialble")
@@ -457,7 +460,7 @@ def main_menu():  # Main Menu function
         print(" ")
         print("     1. Display transactions for a given zip code")
         print("     2. Display number and total values for a given type")
-        print("        ---- Sub Menu")
+        print("        =====>> Sub Menu")
         print("     3. Display total number and values for branches in a given state ")
         print("     4. View or Modify existing account details of a customer")
         print("     5. Generate monthly bill for a given card number")
@@ -471,7 +474,7 @@ def main_menu():  # Main Menu function
         print("     13. Data Visualization - Top Three Months Largest Transactions")
         print("     14. Data Visualization - Highest Healthcare Transaction Branch")
         print("     15. Tableau Data Visualizations")
-        print("         ---- Sub Menu")
+        print("         =====>> Sub Menu")
         print("     16. Exit")
         print("=" * padding)
         choice = input("Enter your choice (1-16): ")
