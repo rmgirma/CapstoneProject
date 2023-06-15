@@ -329,6 +329,8 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
                 ORDER BY TOTAL_VALUE DESC
                 LIMIT 10"""
             df = pd.read_sql_query(query, engine)
+            df = df.sort_values('TOTAL_VALUE', ascending=True) # Sort by 'TOTAL_VALUE' in ascending order
+            df.reset_index(drop=True, inplace=True)  # Reset index
             counts = df.set_index('full_name')['TOTAL_VALUE']
             plt.figure(figsize=(15, 6))
             counts.plot(kind='barh')
@@ -336,7 +338,7 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
             plt.xlabel('Total Transaction Value')
             plt.title('Top 10 Customers by Total Transaction Value')
             plt.xlim(left=5100, right=5700)  # in order to make the difference visible 
-            x = ['TOTAL_VALUE']
+            
             df.apply(lambda row: plt.text(row['TOTAL_VALUE'], row.name, round(row['TOTAL_VALUE'], 2)), axis=1) # to show value on each bar
             #                                  x axis          y axis     text to display
             plt.show()
