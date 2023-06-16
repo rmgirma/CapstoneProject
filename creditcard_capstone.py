@@ -158,7 +158,7 @@ def view_account_details():  # Check existing account details of a customer (2.2
         cursor.execute(query, (ssn,))
         result = cursor.fetchone()
         
-        field_names = [fname[0] for fname in cursor.description] # getting the field names
+        field_names = ['SSN','First Name','Middle Name','Last Name','Credit Card Number','Full Street Address','City','State','Country','Zip Code','Phone','Email','Last Updated']
         pretty = PrettyTable()  
         pretty.field_names = ['Field Name', 'Value']  # structure for the 2 columns table as 'Field Name' and 'Value'
         
@@ -174,7 +174,7 @@ def view_account_details():  # Check existing account details of a customer (2.2
 
 def modify_account_details(ssn):  # Modify account for Question 2.2.2. parameter ssn passed from view_account_details()
     try:
-        print("Please provide the new updates. Leave blank and hit Enter if you do not want to make changes ")
+        print("\nPlease enter your modified values. Leave blank and hit Enter if you do not want to make changes\n")
         first_name = input("Enter new First Name: ")
         middle_name = input("Enter new Middle Name: ")
         last_name = input("Enter new Last Name: ")
@@ -456,7 +456,7 @@ def main_menu():  # Main Menu function
     while True:
         clear_screen()
         print("\n" + "=" * padding)
-        print("Application Console Menu".center(padding))
+        print("Example Bank Application Console Menu".center(padding))
         print("=" * padding)
         print("\nPlease make your selection and press ENTER:")
         print(" ")
