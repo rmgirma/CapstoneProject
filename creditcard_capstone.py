@@ -418,7 +418,7 @@ def show_tableau():
             print("     1. Number and Amount of Customer's Transactions by State")
             print("     2. Total Transaction Amount by Type")
             print("     3. Heatmap Number of Customer by State")
-            print("     4. Dashboard - Example")
+            print("     4. Dashboard - Example Bank")
             print("=" * padding)
             print("     5. Return to Main Menu")
             print("=" * padding)
@@ -451,7 +451,30 @@ def show_tableau():
     except Exception as err:
         print(err)
         input(nav)
-      
+   
+def plot_top3_transaction_month():
+    try:
+        df = pd.read_sql_table('cdw_sapp_credit_card', engine)
+        df['Month'] = pd.to_datetime(df['TIMEID'], format='%Y%m%d').dt.month # convert 'TIMEID' to date to get month
+        monthly_trans = df.groupby('Month')['TRANSACTION_VALUE'].sum() # group by month
+        top3 = monthly_trans.nlargest(3)
+        print(top3)
+        print(monthly_trans)
+        input(nav)
+        plt.figure(figsize=(10, 6))
+        # plt.stem(top3.index, top3.values)
+        # plt.plot(top3.index, top3.values, 'o')
+        plt.bar(top3.index, top3.values, color='blue')
+        plt.xlabel('Month')
+        plt.ylabel('Transaction Value')
+        plt.title('Top 3 Months with Largest Transaction Value')
+        plt.ylim(bottom=200000, top=203000)  # in order to make the difference visible 
+        plt.xticks(top3.index)  #  x-ticks to limit to just the top 3
+        plt.show()
+    except Exception as err:
+        print(err)
+        input(nav)        
+
 def main_menu():  # Main Menu function        
     while True:
         clear_screen()
