@@ -33,7 +33,7 @@ padding = 75 # length of character for padding
 def zipcode_transactions(): # function to display transactions by zipcode (2.1.1)
     try:  # Start of try block
         clear_screen()
-        print("=" * padding)
+        print("=" * padding)   # building the header display
         print("Report By Zip Code".center(padding))
         print("=" * padding)
         zipcode = input("Enter Zip Code: ")
@@ -298,7 +298,7 @@ def plot_transaction_type(): # Data Analysis and Visualization (3.3.1)
 # input(nav)
 
 def plot_customer_states(): # Find and plot which state has a high number of customers (3.3.2)
-    # input("start")
+    # input("start") # for debuging 
     try:
         # if conn.is_connected():
             query = """SELECT cust.CUST_STATE, COUNT(cust.SSN) as NUM_CUSTOMERS
@@ -331,6 +331,7 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
             df = pd.read_sql_query(query, engine)
             df = df.sort_values('TOTAL_VALUE', ascending=True) # Sort by 'TOTAL_VALUE' in ascending order
             df.reset_index(drop=True, inplace=True)  # Reset index
+            
             counts = df.set_index('full_name')['TOTAL_VALUE']
             plt.figure(figsize=(15, 6))
             counts.plot(kind='barh')
@@ -340,7 +341,7 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
             plt.xlim(left=5100, right=5700)  # in order to make the difference visible 
             
             df.apply(lambda row: plt.text(row['TOTAL_VALUE'], row.name, round(row['TOTAL_VALUE'], 2)), axis=1) # to show value on each bar
-            #                                  x axis          y axis     text to display
+            #                                  x location     y location    text to display
             plt.show()
         # else:
             # print("Connection not avaialble")
@@ -357,7 +358,7 @@ def load_loan_data(): #  Loan Application Data API (4.4.1) (4.4.2) & (4.4.3)
         if response.status_code == 200:
             data = json.loads(response.text)
             df = pd.DataFrame(data)
-            df.to_sql('cdw_sapp_loan_application', con=engine, if_exists='append', index=False)  # appends record into the loan table. Drop table manually
+            df.to_sql('cdw_sapp_loan_application', con=engine, index=False)  # appends record into the loan table. Drop table manually if_exists='append',
             print("Loan application data loaded successfully.")
             input(nav)
         else:
@@ -394,14 +395,14 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         rejected_applications = len(married_male_df[married_male_df['Application_Status'] == 'N'])
         
         rejection_rate = rejected_applications / total_married_male
-        acceptance_rate = 1 - rejection_rate  
+        accepted_rate = 1 - rejection_rate  
         plt.figure(figsize=(10, 6))
-        plt.pie([rejection_rate, acceptance_rate], labels=['Rejected', 'Accepted'], 
+        plt.pie([rejection_rate, accepted_rate], labels=['Rejected', 'Accepted'], 
             autopct='%.2f%%', colors=['red', 'green'], startangle=90)
         plt.title('Percentage of Applications Rejected for Married Male Applicants')
         print("\nTotal Married Male: ", total_married_male)
         print("Total Rejections  : ", rejected_applications)
-        print("Rejection Rate %  : ", rejection_rate*100)
+        print("Rejected Rate %  : ", rejection_rate*100)
         input(nav)
         plt.show()
     except Exception as err:
@@ -456,24 +457,72 @@ def plot_top3_transaction_month():
     try:
         df = pd.read_sql_table('cdw_sapp_credit_card', engine)
         df['Month'] = pd.to_datetime(df['TIMEID'], format='%Y%m%d').dt.month # convert 'TIMEID' to date to get month
+        monthly_trans = df.groupby('Month')['TRANSACTION_VALUE'].count() # group by month
+        top3 = monthly_trans.nlargest(3)
+        print(top3)
+        print(monthly_trans)
+        input(nav)
+        plt.figure(figsize=(10, 6))
+        plt.bar(top3.index, top3.values, color='blue')
+        plt.xlabel('Month')
+        plt.ylabel('Transaction Count')
+        plt.title('Top 3 Months with Largest Transaction Data by Count')
+        plt.ylim(bottom=3930, top=3960)  # in order to make the difference visible 
+        plt.xticks(top3.index)  #  x-ticks to limit to just the top 3
+        plt.show()
+    except Exception as err:
+        print(err)
+        input(nav)  
+        
+def plot_top3_transaction_month_by_amount():
+    try:
+        df = pd.read_sql_table('cdw_sapp_credit_card', engine)
+        df['Month'] = pd.to_datetime(df['TIMEID'], format='%Y%m%d').dt.month # convert 'TIMEID' to date to get month
         monthly_trans = df.groupby('Month')['TRANSACTION_VALUE'].sum() # group by month
         top3 = monthly_trans.nlargest(3)
         print(top3)
         print(monthly_trans)
         input(nav)
         plt.figure(figsize=(10, 6))
-        # plt.stem(top3.index, top3.values)
-        # plt.plot(top3.index, top3.values, 'o')
         plt.bar(top3.index, top3.values, color='blue')
         plt.xlabel('Month')
-        plt.ylabel('Transaction Value')
-        plt.title('Top 3 Months with Largest Transaction Value')
+        plt.ylabel('Transaction Amount')
+        plt.title('Top 3 Months with Largest Transaction Data by Amount')
         plt.ylim(bottom=200000, top=203000)  # in order to make the difference visible 
         plt.xticks(top3.index)  #  x-ticks to limit to just the top 3
         plt.show()
     except Exception as err:
         print(err)
-        input(nav)        
+        input(nav)      
+        
+def plot_healthcare_branches():
+    try:
+        query = """SELECT ccard.BRANCH_CODE, round(SUM(ccard.TRANSACTION_VALUE),2) as TOTAL_VALUE
+                   FROM cdw_sapp_credit_card ccard
+                   WHERE ccard.TRANSACTION_TYPE = 'Healthcare'
+                   GROUP BY ccard.BRANCH_CODE
+                   ORDER BY TOTAL_VALUE DESC"""
+                   
+        df = pd.read_sql_query(query, engine)
+        top_branch = df.iloc[0]   # capture the 1st row for top_branch
+        
+        print(f"Branch Code {top_branch['BRANCH_CODE']} has the highest value of $ {top_branch['TOTAL_VALUE']}")
+        input(nav)
+        
+        colors = ['blue' if brcode == top_branch['BRANCH_CODE'] else 'green' for brcode in df['BRANCH_CODE']] # Parameter for graph colors
+        sizes = [300 if brcode == top_branch['BRANCH_CODE'] else 25 for brcode in df['BRANCH_CODE']] # Parameter for marker size
+        
+        plt.figure(figsize=(12, 6))
+        plt.scatter(df['BRANCH_CODE'], df['TOTAL_VALUE'], color=colors, s=sizes)
+        plt.xlabel('Branch Code')
+        plt.ylabel('Total Value of Healthcare Transactions')
+        plt.title('Total Dollar Value of Healthcare Transactions by Branch')
+        plt.xticks([top_branch['BRANCH_CODE']])
+        plt.show()
+    except Exception as err:
+        print(err)
+        input(nav)
+       
 
 def main_menu():  # Main Menu function        
     while True:
@@ -496,13 +545,14 @@ def main_menu():  # Main Menu function
         print("     10. Load Loan Application Dataset")
         print("     11. Data Visualization - Approved Self-Employed Applicants")
         print("     12. Data Visualization - Rejected Married Male Applicants")
-        print("     13. Data Visualization - Top Three Months Largest Transactions")
-        print("     14. Data Visualization - Highest Healthcare Transaction Branch")
-        print("     15. Tableau Data Visualizations")
+        print("     13. Data Visualization - Top Three Months Largest Transactions by Count")
+        print("     14. Data Visualization - Top Three Months Largest Transactions by Amount")
+        print("     15. Data Visualization - Highest Healthcare Transaction Branch")
+        print("     16. Tableau Data Visualizations")
         print("         =====>> Sub Menu")
-        print("     16. Exit")
+        print("     17. Exit")
         print("=" * padding)
-        choice = input("Enter your choice (1-16): ")
+        choice = input("Enter your choice (1-17): ")
         if choice == '1':
             zipcode_transactions()
         elif choice == '2':
@@ -528,16 +578,18 @@ def main_menu():  # Main Menu function
         elif choice == '12':
             plot_rejection_of_married_male()
         elif choice == '13':
-            clear_screen()
+            plot_top3_transaction_month()
         elif choice == '14':
-            clear_screen()
+            plot_top3_transaction_month_by_amount()
         elif choice == '15':
-            show_tableau()
+            plot_healthcare_branches()
         elif choice == '16':
-            print("Exiting...")
+            show_tableau()
+        elif choice == '17':
+            print("Good Bye . . .")
             break
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 16.")   # end of menu function
+            print("\nInvalid choice. Please enter a number between 1 and 17.")   # end of menu function
             
     cursor.close() #close the cursor and connection to the database once done
     conn.close()
