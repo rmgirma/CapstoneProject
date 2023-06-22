@@ -303,7 +303,7 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
         # if conn.is_connected():
             query = """SELECT cust.CUST_STATE, COUNT(cust.SSN) as NUM_CUSTOMERS
                 FROM cdw_sapp_customer cust
-                GROUP BY cust.CUST_STATE ORDER BY cust.CUST_STATE"""
+                GROUP BY cust.CUST_STATE ORDER BY NUM_CUSTOMERS DESC"""  # change the ORDER BY clause to CUST_STATE to order by state
             df = pd.read_sql_query(query, engine)
             plt.figure(figsize=(15, 6))
             counts = df.set_index('CUST_STATE')['NUM_CUSTOMERS']
@@ -341,7 +341,7 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
             plt.xlim(left=5100, right=5700)  # in order to make the difference visible 
             
             df.apply(lambda row: plt.text(row['TOTAL_VALUE'], row.name, round(row['TOTAL_VALUE'], 2)), axis=1) # to show value on each bar
-            #                                  x location     y location    text to display
+            #                    x location                   y location    display amt rounded to 2 decimal 
             plt.show()
         # else:
             # print("Connection not avaialble")
@@ -358,7 +358,7 @@ def load_loan_data(): #  Loan Application Data API (4.4.1) (4.4.2) & (4.4.3)
         if response.status_code == 200:
             data = json.loads(response.text)
             df = pd.DataFrame(data)
-            df.to_sql('cdw_sapp_loan_application', con=engine, index=False)  # appends record into the loan table. Drop table manually if_exists='append',
+            df.to_sql('cdw_sapp_loan_application', con=engine, index=False)  # write data in the dataframe to database. if_exists='fail' 
             print("Loan application data loaded successfully.")
             input(nav)
         else:
