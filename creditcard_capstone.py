@@ -8,10 +8,6 @@ from sqlalchemy import create_engine  # create sqlalchemy engine as the mysql.co
 import requests 
 import json
 import webbrowser # for Tableau charts
-
-
-def clear_screen():  # function to clear the screen between menu change
-        _ = os.system('cls')
         
 conn = mysql.connector.connect(   # connection to the database
     host='localhost',
@@ -26,9 +22,73 @@ engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}" # sql
                        .format(user="root", pw="password", db="creditcard_capstone"))
 
 # constant declarations:
-nav = "\nPress Enter key to continue..." # used to pause the flow
+nav = "\nPress any key to continue..." # used to pause the flow
 padding = 75 # length of character for padding 
-# df_global = pd.DataFrame()  # Initialize an empty DataFrame
+
+def exit_program():
+    print("Good Bye...")
+    cursor.close() #close the cursor and connection to the database
+    conn.close()
+    engine.dispose
+    exit()
+    
+def clear_screen():  # function to clear the screen between menu change
+        _ = os.system('cls')    
+        
+def main_menu():  # Main Menu function
+    menu_option = {
+        '1': zipcode_transactions,
+        '2': sum_by_type,
+        '3': branch_transactions,
+        '4': view_account_details,
+        '5': monthly_bill,
+        '6': transactions_between_dates,
+        '7': plot_transaction_type,
+        '8': plot_customer_states,
+        '9': plot_top_customers,
+        '10': load_loan_data,
+        '11': plot_self_employed_approval,
+        '12': plot_rejection_of_married_male,
+        '13': plot_top3_transaction_month,
+        '14': plot_top3_transaction_month_by_amount,
+        '15': plot_healthcare_branches,
+        '16': show_tableau,
+        '17': exit_program
+    }
+
+    while True:
+        clear_screen()
+        print("\n" + "=" * padding)
+        print("Example Bank Application Console Menu".center(padding))
+        print("=" * padding)
+        print("\nPlease make your selection and press ENTER:")
+        print(" ")
+        print("     1. Display transactions for a given zip code")
+        print("     2. Display number and total values for a given type")
+        print("        =====>> Sub Menu")
+        print("     3. Display total number and values for branches in a given state ")
+        print("     4. View or Modify existing account details of a customer")
+        print("     5. Generate monthly bill for a given card number")
+        print("     6. Display customer transactions between two dates")
+        print("     7. Data Visualization - Transaction count by Type")
+        print("     8. Data Visualization - Number of Customer by State")
+        print("     9. Data Visualization - Top Ten Customeers by Transaction Amount")
+        print("     10. Load Loan Application Dataset")
+        print("     11. Data Visualization - Approved Self-Employed Applicants")
+        print("     12. Data Visualization - Rejected Married Male Applicants")
+        print("     13. Data Visualization - Top Three Months Largest Transactions by Count")
+        print("     14. Data Visualization - Top Three Months Largest Transactions by Amount")
+        print("     15. Data Visualization - Highest Healthcare Transaction Branch")
+        print("     16. Tableau Data Visualizations")
+        print("         =====>> Sub Menu")
+        print("     17. Exit")
+        print("=" * padding)
+        selected = input("Enter your choice (1-17): ")
+
+        if selected in menu_option:
+            menu_option[selected]()  # calls the selected function
+        else:
+            print("\nInvalid choice. Please enter a number between 1 and 17.")
 
 def zipcode_transactions(): # function to display transactions by zipcode (2.1.1)
     try:  # Start of try block
@@ -298,7 +358,7 @@ def plot_transaction_type(): # Data Analysis and Visualization (3.3.1)
 # input(nav)
 
 def plot_customer_states(): # Find and plot which state has a high number of customers (3.3.2)
-    # input("start") # for debuging 
+    input("start") # for debuging 
     try:
         # if conn.is_connected():
             query = """SELECT cust.CUST_STATE, COUNT(cust.SSN) as NUM_CUSTOMERS
@@ -392,16 +452,18 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         df = pd.read_sql_table('cdw_sapp_loan_application', engine)  # Load data from database 
         married_male_df = df[(df['Gender'] == 'Male') & (df['Married'] == 'Yes')]
         total_married_male = len(married_male_df)
-        rejected_applications = len(married_male_df[married_male_df['Application_Status'] == 'N'])
-        
-        rejection_rate = rejected_applications / total_married_male
+        rejected_applications = married_male_df[married_male_df['Application_Status'] == 'N']
+        total_rejected = len(rejected_applications)
+        # print(rejected_applications)
+        # input(nav)
+        rejection_rate = total_rejected / total_married_male
         accepted_rate = 1 - rejection_rate  
         plt.figure(figsize=(10, 6))
         plt.pie([rejection_rate, accepted_rate], labels=['Rejected', 'Accepted'], 
             autopct='%.2f%%', colors=['red', 'green'], startangle=90)
         plt.title('Percentage of Applications Rejected for Married Male Applicants')
         print("\nTotal Married Male: ", total_married_male)
-        print("Total Rejections  : ", rejected_applications)
+        print("Total Rejections  : ", total_rejected)
         print("Rejected Rate %  : ", rejection_rate*100)
         input(nav)
         plt.show()
@@ -447,7 +509,7 @@ def show_tableau():
             # print("Status Code: ", response.status_code)
             # input(nav)                          
             if response.status_code == 200:
-                webbrowser.open_new_tab(url)
+                webbrowser.open(url)
             clear_screen()
     except Exception as err:
         print(err)
@@ -468,7 +530,7 @@ def plot_top3_transaction_month():
         plt.ylabel('Transaction Count')
         plt.title('Top 3 Months with Largest Transaction Data by Count')
         plt.ylim(bottom=3930, top=3960)  # in order to make the difference visible 
-        plt.xticks(top3.index)  #  x-ticks to limit to just the top 3
+        plt.xticks(top3.index)  #  x-ticks to display just the top 3
         plt.show()
     except Exception as err:
         print(err)
@@ -510,88 +572,17 @@ def plot_healthcare_branches():
         input(nav)
         
         colors = ['blue' if brcode == top_branch['BRANCH_CODE'] else 'green' for brcode in df['BRANCH_CODE']] # Parameter for graph colors
-        sizes = [300 if brcode == top_branch['BRANCH_CODE'] else 25 for brcode in df['BRANCH_CODE']] # Parameter for marker size
+        sizes = [200 if brcode == top_branch['BRANCH_CODE'] else 20 for brcode in df['BRANCH_CODE']] # Parameter for marker size
         
         plt.figure(figsize=(12, 6))
         plt.scatter(df['BRANCH_CODE'], df['TOTAL_VALUE'], color=colors, s=sizes)
         plt.xlabel('Branch Code')
         plt.ylabel('Total Value of Healthcare Transactions')
         plt.title('Total Dollar Value of Healthcare Transactions by Branch')
-        plt.xticks([top_branch['BRANCH_CODE']])
+        plt.xticks([top_branch['BRANCH_CODE']])  # identify the top branch code
         plt.show()
     except Exception as err:
         print(err)
         input(nav)
-       
-
-def main_menu():  # Main Menu function        
-    while True:
-        clear_screen()
-        print("\n" + "=" * padding)
-        print("Example Bank Application Console Menu".center(padding))
-        print("=" * padding)
-        print("\nPlease make your selection and press ENTER:")
-        print(" ")
-        print("     1. Display transactions for a given zip code")
-        print("     2. Display number and total values for a given type")
-        print("        =====>> Sub Menu")
-        print("     3. Display total number and values for branches in a given state ")
-        print("     4. View or Modify existing account details of a customer")
-        print("     5. Generate monthly bill for a given card number")
-        print("     6. Display customer transactions between two dates")
-        print("     7. Data Visualization - Transaction count by Type")
-        print("     8. Data Visualization - Number of Customer by State")
-        print("     9. Data Visualization - Top Ten Customeers by Transaction Amount")
-        print("     10. Load Loan Application Dataset")
-        print("     11. Data Visualization - Approved Self-Employed Applicants")
-        print("     12. Data Visualization - Rejected Married Male Applicants")
-        print("     13. Data Visualization - Top Three Months Largest Transactions by Count")
-        print("     14. Data Visualization - Top Three Months Largest Transactions by Amount")
-        print("     15. Data Visualization - Highest Healthcare Transaction Branch")
-        print("     16. Tableau Data Visualizations")
-        print("         =====>> Sub Menu")
-        print("     17. Exit")
-        print("=" * padding)
-        choice = input("Enter your choice (1-17): ")
-        if choice == '1':
-            zipcode_transactions()
-        elif choice == '2':
-            sum_by_type()             
-        elif choice == '3':
-            branch_transactions()
-        elif choice == '4':
-            view_account_details()
-        elif choice == '5':
-           monthly_bill()
-        elif choice == '6':
-            transactions_between_dates()
-        elif choice == '7':
-            plot_transaction_type()
-        elif choice == '8':
-            plot_customer_states()
-        elif choice == '9':
-            plot_top_customers()
-        elif choice == '10':
-            load_loan_data()
-        elif choice == '11':
-            plot_self_employed_approval()
-        elif choice == '12':
-            plot_rejection_of_married_male()
-        elif choice == '13':
-            plot_top3_transaction_month()
-        elif choice == '14':
-            plot_top3_transaction_month_by_amount()
-        elif choice == '15':
-            plot_healthcare_branches()
-        elif choice == '16':
-            show_tableau()
-        elif choice == '17':
-            print("Good Bye . . .")
-            break
-        else:
-            print("\nInvalid choice. Please enter a number between 1 and 17.")   # end of menu function
-            
-    cursor.close() #close the cursor and connection to the database once done
-    conn.close()
-# program starts here . Run the Main Menu 
-main_menu()
+        
+main_menu()  # program starts here . Run the Main Menu 
