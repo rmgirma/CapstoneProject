@@ -16,6 +16,7 @@ conn = mysql.connector.connect(   # connection to the database
     password='password',
     database='creditcard_capstone'
 )
+
 cursor = conn.cursor() # Create a cursor object to load data
 
 engine = create_engine("mysql+mysqlconnector://{user}:{pw}@localhost/{db}" # sqlalchemy engine needed to work for Pandas
@@ -72,7 +73,7 @@ def main_menu():  # Main Menu function
         print("     6. Display customer transactions between two dates")
         print("     7. Data Visualization - Transaction count by Type")
         print("     8. Data Visualization - Number of Customer by State")
-        print("     9. Data Visualization - Top Ten Customeers by Transaction Amount")
+        print("     9. Data Visualization - Top Ten Customers by Transaction Amount")
         print("     10. Load Loan Application Dataset")
         print("     11. Data Visualization - Approved Self-Employed Applicants")
         print("     12. Data Visualization - Rejected Married Male Applicants")
@@ -89,6 +90,7 @@ def main_menu():  # Main Menu function
             menu_option[selected]()  # calls the selected function
         else:
             print("\nInvalid choice. Please enter a number between 1 and 17.")
+            input(nav)
 
 def zipcode_transactions(): # function to display transactions by zipcode (2.1.1)
     try:  # Start of try block
@@ -100,7 +102,7 @@ def zipcode_transactions(): # function to display transactions by zipcode (2.1.1
         month = input("Enter Month as 2 digits: ")
         year = input("Enter Year as YYYY: ")
         query = """SELECT CONCAT(SUBSTRING(ccard.TIMEID, 5, 2), '/', SUBSTRING(ccard.TIMEID, 7, 2), '/', SUBSTRING(ccard.TIMEID, 1, 4)) AS FTIMEID,
-                cust.FIRST_NAME, cust.MIDDLE_NAME, cust.LAST_NAME, cust.cust_phone, cust.FULL_STREET_ADDRESS,
+                cust.FIRST_NAME, cust.MIDDLE_NAME, cust.LAST_NAME, cust.cust_phone, cust.FULL_STREET_ADDRESS, cust.cust_city,
                 cust.cust_zip, cust.CREDIT_CARD_NO, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
                 FROM cdw_sapp_customer cust join cdw_sapp_credit_card ccard on ccard.CUST_SSN = cust.SSN
                 where cust.CUST_ZIP =  %s and MONTH(ccard.TIMEID) = %s AND YEAR(ccard.TIMEID) = %s
@@ -108,7 +110,7 @@ def zipcode_transactions(): # function to display transactions by zipcode (2.1.1
         cursor.execute(query, (zipcode, month, year))
         results = cursor.fetchall()  # to return all rows
         pretty = PrettyTable()  # create a PrettyTable object to display result in tabular manner
-        pretty.field_names = ['Date', 'First Name', 'Middle', 'Last Name', 'Phone Number', 'Street Address', 'Zip Code', 'Credit Card Number', 'Transaction-Type', 'Amount']
+        pretty.field_names = ['Date', 'First Name', 'Middle', 'Last Name', 'Phone Number', 'Street Address', 'City', 'Zip Code', 'Credit Card Number', 'Transaction-Type', 'Amount']
         for result in results:
             pretty.add_row(result)
         print(pretty)
@@ -358,7 +360,7 @@ def plot_transaction_type(): # Data Analysis and Visualization (3.3.1)
 # input(nav)
 
 def plot_customer_states(): # Find and plot which state has a high number of customers (3.3.2)
-    input("start") # for debuging 
+    # input("start") # for debuging 
     try:
         # if conn.is_connected():
             query = """SELECT cust.CUST_STATE, COUNT(cust.SSN) as NUM_CUSTOMERS
@@ -367,6 +369,8 @@ def plot_customer_states(): # Find and plot which state has a high number of cus
             df = pd.read_sql_query(query, engine)
             plt.figure(figsize=(15, 6))
             counts = df.set_index('CUST_STATE')['NUM_CUSTOMERS']
+            print(counts)
+            input(nav)
             counts.plot(kind='bar', color='green')
             plt.xlabel('State')
             plt.ylabel('Number of Customers')
@@ -390,7 +394,7 @@ def plot_top_customers(): # sum of all transactions for the top 10 customers (3.
                 LIMIT 10"""
             df = pd.read_sql_query(query, engine)
             df = df.sort_values('TOTAL_VALUE', ascending=True) # Sort by 'TOTAL_VALUE' in ascending order
-            df.reset_index(drop=True, inplace=True)  # Reset index
+            df.reset_index(inplace=True)  # Reset index for labels to be aligned correctly 
             
             counts = df.set_index('full_name')['TOTAL_VALUE']
             plt.figure(figsize=(15, 6))
@@ -433,9 +437,10 @@ def plot_self_employed_approval(): # to find and plot the percentage of applicat
     try:
         df = pd.read_sql_table('cdw_sapp_loan_application', engine)  # Load data from database 
         self_employed_df = df[df['Self_Employed'] == 'Yes']
-        total_applications = len(self_employed_df)
-        approved_applications = len(self_employed_df[self_employed_df['Application_Status'] == 'Y'])
-        approval_rate = approved_applications / total_applications
+        total_self_employed = len(self_employed_df)
+        approved_applications = self_employed_df[self_employed_df['Application_Status'] == 'Y']
+        total_approved_app = len(approved_applications)
+        approval_rate = total_approved_app / total_self_employed
         notapproval_rate = 1 - approval_rate  # Disapproval rate is the remainder
         
         plt.figure(figsize=(10, 6))
@@ -568,7 +573,7 @@ def plot_healthcare_branches():
         df = pd.read_sql_query(query, engine)
         top_branch = df.iloc[0]   # capture the 1st row for top_branch
         
-        print(f"Branch Code {top_branch['BRANCH_CODE']} has the highest value of $ {top_branch['TOTAL_VALUE']}")
+        print(f"Branch Code {top_branch['BRANCH_CODE']} has the highest transaction value of $ {top_branch['TOTAL_VALUE']}")
         input(nav)
         
         colors = ['blue' if brcode == top_branch['BRANCH_CODE'] else 'green' for brcode in df['BRANCH_CODE']] # Parameter for graph colors
