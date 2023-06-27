@@ -471,7 +471,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         print("Total Rejections  : ", total_rejected)
         print("Rejected Rate %  : ", rejection_rate*100)
         input(nav)
-        
+        plt.show()
     except Exception as err:
         print(err)
         input(nav)
@@ -578,7 +578,7 @@ def plot_healthcare_branches():
         
         colors = ['blue' if brcode == top_branch['BRANCH_CODE'] else 'green' for brcode in df['BRANCH_CODE']] # Parameter for graph colors
         sizes = [200 if brcode == top_branch['BRANCH_CODE'] else 20 for brcode in df['BRANCH_CODE']] # Parameter for marker size
-        
+        # add label for the branch no.
         plt.figure(figsize=(12, 6))
         plt.scatter(df['BRANCH_CODE'], df['TOTAL_VALUE'], color=colors, s=sizes)
         plt.xlabel('Branch Code')
