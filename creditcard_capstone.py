@@ -1,6 +1,5 @@
 import os
 import mysql.connector
-from mysql.connector import Error
 from prettytable import PrettyTable
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -157,6 +156,7 @@ def sum_by_type():  # display the number and total value for a given Type . (2.1
                 break
             else:
                 print("Invalid choice. Please enter a valid Transaction Type.")
+                
             query = """SELECT TRANSACTION_TYPE,  count(TRANSACTION_TYPE) total_num, ROUND(sum(TRANSACTION_VALUE),2) tot_amount from CDW_SAPP_CREDIT_CARD
                             group by TRANSACTION_TYPE
                             having TRANSACTION_TYPE= %s """
@@ -224,7 +224,7 @@ def view_account_details():  # Check existing account details of a customer (2.2
         pretty = PrettyTable()  
         pretty.field_names = ['Field Name', 'Value']  # structure for the 2 columns table as 'Field Name' and 'Value'
         
-        for field, value in zip(field_names, result): # here using the  Python zip() function to add rows to the PrettyTable object
+        for field, value in zip(field_names, result): # here using the  Python zip() function to iterate the pair of FieldName and Values as tupples into the PrettyTable
             pretty.add_row([field, value])  # adding a row for each field-value pair
         print(pretty)
         modify = input("\nEnter Y to modify the record or any key to ignore:  ")
@@ -319,7 +319,7 @@ def transactions_between_dates():  # display the transactions made by a customer
         ssn = input("Enter customer's SSN: ")
         dt_start = input("Enter Start date (YYYY-MM-DD): ")
         dt_end = input("Enter End date (YYYY-MM-DD): ")
-        dt_start = dt_start.replace("-", "")  # remove the - to so that format 'YYYYMMDD' matchs the TIMEID format
+        dt_start = dt_start.replace("-", "")  # remove the - to so that format 'YYYYMMDD' matchs the TIMEID format in database
         dt_end = dt_end.replace("-", "")
         query = """SELECT CONCAT(SUBSTRING(ccard.TIMEID, 5, 2), '/', SUBSTRING(ccard.TIMEID, 7, 2), '/', SUBSTRING(ccard.TIMEID, 1, 4)) AS FTIMEID, 
                 cust.FIRST_NAME, cust.LAST_NAME, ccard.TRANSACTION_TYPE, ccard.TRANSACTION_VALUE
@@ -445,7 +445,7 @@ def plot_self_employed_approval(): # to find and plot the percentage of applicat
         
         plt.figure(figsize=(10, 6))
         plt.pie([approval_rate, notapproval_rate], labels=['Approved', 'Not Approved'], 
-                autopct='%1.1f%%', colors=['green', 'grey'], startangle=90)
+                autopct='%1.2f%%', colors=['green', 'grey'], startangle=90)
         plt.title('Percentage of Applications Approved for Self-Employed Applicants')
         plt.show()
     except Exception as err:
@@ -471,7 +471,7 @@ def plot_rejection_of_married_male(): # to find the percentage of rejection for 
         print("Total Rejections  : ", total_rejected)
         print("Rejected Rate %  : ", rejection_rate*100)
         input(nav)
-        plt.show()
+        
     except Exception as err:
         print(err)
         input(nav)
@@ -573,7 +573,7 @@ def plot_healthcare_branches():
         df = pd.read_sql_query(query, engine)
         top_branch = df.iloc[0]   # capture the 1st row for top_branch
         
-        print(f"Branch Code {top_branch['BRANCH_CODE']} has the highest transaction value of $ {top_branch['TOTAL_VALUE']}")
+        print(f"Branch Code {top_branch['BRANCH_CODE']} has the highest Health Care transaction value of $ {top_branch['TOTAL_VALUE']}")
         input(nav)
         
         colors = ['blue' if brcode == top_branch['BRANCH_CODE'] else 'green' for brcode in df['BRANCH_CODE']] # Parameter for graph colors
