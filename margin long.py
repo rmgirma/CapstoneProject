@@ -31,15 +31,15 @@ class MarginTrade:
         self.trades.append({
             "T #": trade_number,
             "Trade QTY": round(trade_qty, 4),
-            "Asset Quantity": round(self.asset_quantity, 4),
+         #   "Asset Quantity": round(self.asset_quantity, 4),
             "Trade Price": round(trade_price, 2),
-            "Unit Price": round(self.unit_price, 2),
-            "Total Margin": round(self.trade_amount, 2),
+         #   "Unit Price": round(self.unit_price, 2),
+         #  "Total Margin": round(self.trade_amount, 2),
             "Trade Amount": round(trade_amount, 2),
             "Actual Cash": round(self.actual_cash_used, 2),
-            "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
-            "Liquidation": round(liquidation_price, 2),
-            "101 PCT": round(liquidation_price * 1.01, 2)
+         #  "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
+            "Liquidation": round(liquidation_price, 2) #,
+         #  "101 PCT": round(liquidation_price * 1.01, 2)
         })
 
     def get_trades_dataframe(self):
