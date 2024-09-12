@@ -14,8 +14,8 @@ def clear_screen():  # function to clear the screen between menu changes
 
 def main_menu():  # Main Menu function
     menu_option = {
-        '1': MarginTradeLongMenu,
-        '2': MarginTradeShortMenu,
+        '1': margin_trade_long_menu,
+        '2': margin_trade_short_menu,
         '3': exit_program
     }
 
@@ -130,7 +130,7 @@ class MarginTradeShort:
         return pd.DataFrame(self.trades)
 
 
-def MarginTradeLongMenu():
+def margin_trade_long_menu():
     # Prompt the user for inputs with validation
     margin = get_float_input("Enter the margin (e.g., 7): ")
     initial_trade_amount = get_float_input("Enter the initial trade amount (e.g., 2000): ")
@@ -151,7 +151,7 @@ def MarginTradeLongMenu():
     input(nav)  # Pause before returning to the menu
 
 
-def MarginTradeShortMenu():
+def margin_trade_short_menu():
     # Prompt the user for inputs with validation
     margin = get_float_input("Enter the margin (e.g., 7): ")
     initial_trade_amount = get_float_input("Enter the initial trade amount (e.g., 2000): ")
