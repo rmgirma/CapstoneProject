@@ -1,6 +1,6 @@
 import pandas as pd
 
-class MarginTrade:
+class MarginTradeShort:
     def __init__(self, margin, initial_trade_amount, initial_unit_price):
         self.margin = margin
         self.trade_amount = initial_trade_amount
@@ -60,7 +60,7 @@ initial_trade_amount = get_float_input("Enter the initial trade amount (e.g., 20
 initial_unit_price = get_float_input("Enter the initial unit price (e.g., 61005): ")
 
 # Initialize the first trade
-trade = MarginTrade(margin, initial_trade_amount, initial_unit_price)
+trade = MarginTradeShort(margin, initial_trade_amount, initial_unit_price)
 
 # Place subsequent trades
 for i in range(2, 11):  # Continue until the 10th trade
