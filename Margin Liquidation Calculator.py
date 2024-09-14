@@ -71,7 +71,7 @@ class MarginTradeLong:
         self.record_trade(trade_number, new_asset_quantity, new_unit_price, self.liquidation_price, new_trade_amount)
 
     def next_liquidation_price(self):
-        return self.liquidation_price * 1.01
+        return self.liquidation_price * 1.005
 
     def record_trade(self, trade_number, trade_qty, trade_price, liquidation_price, trade_amount):
         self.trades.append({
@@ -112,7 +112,7 @@ class MarginTradeShort:
         self.record_trade(trade_number, new_asset_quantity, new_unit_price, self.liquidation_price, new_trade_amount)
 
     def next_liquidation_price(self):
-        return self.liquidation_price * 0.99
+        return self.liquidation_price * 0.995
 
     def record_trade(self, trade_number, trade_qty, trade_price, liquidation_price, trade_amount):
         self.trades.append({
