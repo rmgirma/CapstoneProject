@@ -3,7 +3,7 @@ import pandas as pd
 
 # constant declarations:
 nav = "\nPress any key to continue..."  # used to pause the flow
-padding = 115  # length of character for padding
+padding = 75  # length of character for padding
 
 def exit_program():
     print("Good Bye...")
@@ -22,32 +22,22 @@ def main_menu():  # Main Menu function
     while True:
         clear_screen()
         print("\n" + "=" * padding)
-        print("Leverage Trade Order Generator".center(padding))
+        print("Margin Trade Liquidation Calculator".center(padding))
         print("=" * padding)
-        print("\nDeveloped by Abay GERD Token")
-        print("Claim your free tokens at www.abaygerdtoken.com")
-       # print("Uber Trading")
-       # print("\n" + "=" * padding)
-       # print("\nThis code helps generate up to 10 trade levels, allowing you to open both long and short trades simultaneously")
-       # print("preventing liquidation up to your desired level, normally 3rd or 4th level in my case but feel free to experiment.")
-       # print("\nAs soon as your trade gains exceed $20, you can take profits and open a new order at the current market price.") 
-       # print("You continue trading this way, consistently collecting profits at your chosen threshold — I typically set mine at $15 or more.") 
-       # print("This strategy, called 'Uber Trading,' is designed to continuously generate profits throughout the days ahead.")
-        print("\nHappy Uber Trading !")
-        print("\nPlease select your trade direction and press ENTER:")
+        print("\nPlease make your selection and press ENTER:")
         print(" ")
-        print("     1. Long Trade- with Margin")
-        print("     2. Short Trade - with Margin")
+        print("     1. Long - Margin Trade")
+        print("     2. Short - Margin Trade")
         print("     3. Exit")
         print("=" * padding)
         selected = input("Enter your choice (1-3): ")
 
         if selected in menu_option:
-            menu_option[selected]()  # calls the selected function
+            margin_trade_long_menu()  # calls the selected function
+            margin_trade_short_menu()  # calls the selected function
         else:
-            print("\nInvalid choice. Please enter a number between 1 and 3.")
+            print("\nInvalid choice. Please enter a number between 1 and 2.")
             input(nav)
-
 
 # Function to safely get a float input
 def get_float_input(prompt):
@@ -85,14 +75,14 @@ class MarginTradeLong:
 
     def record_trade(self, trade_number, trade_qty, trade_price, liquidation_price, trade_amount):
         self.trades.append({
-            "Order #": trade_number,
-            "Trade Price": round(trade_price, 2),
+            "T #": trade_number,
             "Trade Amount": round(trade_amount, 2),
-            "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
-            "Next Liquidation": round(liquidation_price, 2),
+            "Trade Price": round(trade_price, 2),
             "Quantity": round(trade_qty, 4),
             "Cumulative QTY": round(self.asset_quantity, 4),
-            "AVG Price": round(self.unit_price, 2)            
+            "AVG Price": round(self.unit_price, 2),
+            "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
+            "Next Liquidation": round(liquidation_price, 2)
         })
 
     def get_trades_dataframe(self):
@@ -126,14 +116,14 @@ class MarginTradeShort:
 
     def record_trade(self, trade_number, trade_qty, trade_price, liquidation_price, trade_amount):
         self.trades.append({
-            "Order #": trade_number,
-            "Trade Price": round(trade_price, 2),
+            "T #": trade_number,
             "Trade Amount": round(trade_amount, 2),
-            "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
-            "Next Liquidation": round(liquidation_price, 2),
+            "Trade Price": round(trade_price, 2),
             "Quantity": round(trade_qty, 4),
             "Cumulative QTY": round(self.asset_quantity, 4),
-            "AVG Price": round(self.unit_price, 2)            
+            "AVG Price": round(self.unit_price, 2),
+            "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
+            "Next Liquidation": round(liquidation_price, 2)
         })
 
     def get_trades_dataframe(self):
@@ -142,9 +132,9 @@ class MarginTradeShort:
 
 def margin_trade_long_menu():
     # Prompt the user for inputs with validation
-    margin = get_float_input("Enter the leverage (e.g., 7 for 7x): ")
-    initial_trade_amount = get_float_input("Enter the total amount to Buy/Long in USD (e.g., 2500): ")
-    initial_unit_price = get_float_input("Enter stock unit price (e.g., 247.61): ")
+    margin = get_float_input("Enter the margin (e.g., 7): ")
+    initial_trade_amount = get_float_input("Enter the initial trade amount (e.g., 2000): ")
+    initial_unit_price = get_float_input("Enter the initial unit price (e.g., 61005): ")
 
     # Initialize the first trade
     trade = MarginTradeLong(margin, initial_trade_amount, initial_unit_price)
@@ -157,17 +147,15 @@ def margin_trade_long_menu():
 
     # Retrieve and display the trades in a DataFrame
     df = trade.get_trades_dataframe()
-    print("\n" + "=" * padding)
     print(df)
-    print("\n" + "=" * padding)
     input(nav)  # Pause before returning to the menu
 
 
 def margin_trade_short_menu():
     # Prompt the user for inputs with validation
-    margin = get_float_input("Enter the leverage (e.g., 7 for 7x): ")
-    initial_trade_amount = get_float_input("Enter the total amount to Sell/Short in $ (e.g., 2500): ")
-    initial_unit_price = get_float_input("Enter stock unit price (e.g., 247.61): ")
+    margin = get_float_input("Enter the margin (e.g., 7): ")
+    initial_trade_amount = get_float_input("Enter the initial trade amount (e.g., 2000): ")
+    initial_unit_price = get_float_input("Enter the initial unit price (e.g., 61005): ")
 
     # Initialize the first trade
     trade = MarginTradeShort(margin, initial_trade_amount, initial_unit_price)
@@ -180,9 +168,7 @@ def margin_trade_short_menu():
 
     # Retrieve and display the trades in a DataFrame
     df = trade.get_trades_dataframe()
-    print("\n" + "=" * padding)
     print(df)
-    print("\n" + "=" * padding)
     input(nav)  # Pause before returning to the menu
 
 
