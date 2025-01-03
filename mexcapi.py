@@ -9,13 +9,15 @@ from dotenv import load_dotenv
 # Load your API credentials from environment variables
 load_dotenv()
 
-API_KEY = os.getenv('mx0vglNKKDb7Vvecq8')
-API_SECRET = os.getenv('3b487f2afa6a4b1c9f2e0945162d4936')
+API_KEY = 'mx0vglk6hwL0j8EEa7'
+API_SECRET = 'e956137e68294e8c81411fcb784a39f6'
 
 BASE_URL = "https://api.mexc.com"
 
 def create_signature(params, secret_key):
-    query_string = '&'.join([f"{key}={params[key]}" for key in sorted(params)])
+    # Sort parameters and create query string without URL encoding
+    sorted_params = sorted(params.items())
+    query_string = '&'.join([f"{key}={value}" for key, value in sorted_params])
     return hmac.new(secret_key.encode('utf-8'), query_string.encode('utf-8'), hashlib.sha256).hexdigest()
 
 def place_order(symbol, side, order_type, quantity, price=None):
@@ -36,18 +38,21 @@ def place_order(symbol, side, order_type, quantity, price=None):
         "symbol": symbol,
         "side": side,
         "type": order_type,
-        "quantity": quantity,
-        "timestamp": int(time.time() * 1000)  # Unix timestamp in milliseconds
+        "quantity": str(quantity),  # Convert to string
+        "timestamp": str(int(time.time() * 1000))  # Convert timestamp to string
     }
     
     if order_type == 'LIMIT':
         if price is None:
             raise ValueError("Price is required for LIMIT orders.")
-        params['price'] = price
+        params['price'] = str(price)  # Convert price to string
         params['timeInForce'] = 'GTC'  # Good till canceled
     
     # Generate signature
-    params['signature'] = create_signature(params, API_SECRET)
+    signature = create_signature(params, API_SECRET)
+    
+    # Important: Don't include signature in params used for signature generation
+    params['signature'] = signature
     
     # Create headers
     headers = {
@@ -65,10 +70,10 @@ def place_order(symbol, side, order_type, quantity, price=None):
 
 # Example usage:
 if __name__ == "__main__":
-    symbol = 'BTCUSDT'  # Pair to trade
+    symbol = 'WBTCUSDT'  # Pair to trade
     side = 'BUY'  # BUY or SELL
     order_type = 'MARKET'  # Order type
-    quantity = 0.0001  # Amount of BTC to buy
+    quantity = 0.0005  # Amount of BTC to buy
     
     try:
         order_response = place_order(symbol, side, order_type, quantity)

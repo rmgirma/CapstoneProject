@@ -31,7 +31,7 @@ def main_menu():  # Main Menu function
        # print("\nThis code helps generate up to 10 trade levels, allowing you to open both long and short trades simultaneously")
        # print("preventing liquidation up to your desired level, normally 3rd or 4th level in my case but feel free to experiment.")
        # print("\nAs soon as your trade gains exceed $20, you can take profits and open a new order at the current market price.") 
-       # print("You continue trading this way, consistently collecting profits at your chosen threshold — I typically set mine at $15 or more.") 
+       # print("You continue trading this way, consistently collecting profits at your chosen threshold.") 
        # print("This strategy, called 'Uber Trading,' is designed to continuously generate profits throughout the days ahead.")
         print("\nHappy Uber Trading !")
         print("\nPlease select your trade direction and press ENTER:")
@@ -127,12 +127,12 @@ class MarginTradeShort:
     def record_trade(self, trade_number, trade_qty, trade_price, liquidation_price, trade_amount):
         self.trades.append({
             "Order #": trade_number,
-            "Trade Price": round(trade_price, 2),
-            "Trade Amount": round(trade_amount, 2),
-            "Cumulative Cash Used": round(self.cumulative_cash_used, 2),
-            "Next Liquidation": round(liquidation_price, 2),
-            "Quantity": round(trade_qty, 4),
-            "Cumulative QTY": round(self.asset_quantity, 4),
+            "Trade Price": round(trade_price, 3),
+            "Trade Amount": round(trade_amount, 0),
+            "Cumulative Cash Used": round(self.cumulative_cash_used, 0),
+            "Next Liquidation": round(liquidation_price, 3),
+            "Quantity": round(trade_qty, 3),
+            "Cumulative QTY": round(self.asset_quantity, 3),
             "AVG Price": round(self.unit_price, 2)            
         })
 
@@ -144,7 +144,7 @@ def margin_trade_long_menu():
     # Prompt the user for inputs with validation
     margin = get_float_input("Enter the leverage (e.g., 7 for 7x): ")
     initial_trade_amount = get_float_input("Enter the total amount to Buy/Long in USD (e.g., 2500): ")
-    initial_unit_price = get_float_input("Enter stock unit price (e.g., 247.61): ")
+    initial_unit_price = get_float_input("Enter Token's purchase unit price (e.g., 247.61): ")
 
     # Initialize the first trade
     trade = MarginTradeLong(margin, initial_trade_amount, initial_unit_price)
@@ -167,7 +167,7 @@ def margin_trade_short_menu():
     # Prompt the user for inputs with validation
     margin = get_float_input("Enter the leverage (e.g., 7 for 7x): ")
     initial_trade_amount = get_float_input("Enter the total amount to Sell/Short in $ (e.g., 2500): ")
-    initial_unit_price = get_float_input("Enter stock unit price (e.g., 247.61): ")
+    initial_unit_price = get_float_input("Enter Token's purchase unit price (e.g., 247.61): ")
 
     # Initialize the first trade
     trade = MarginTradeShort(margin, initial_trade_amount, initial_unit_price)
